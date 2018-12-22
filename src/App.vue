@@ -14,25 +14,28 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 * {
 	margin: 0;
 	padding: 0;
 	position: relative;
 	border: none;
-}
-#app {
-	font-family: "Avenir", Helvetica, Arial, sans-serif;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-align: center;
-	color: #2c3e50;
-	height: 100vh;
-	width: 100vw;
-}
-.full-container {
-	width: 100%;
-	height: 100%;
-	overflow: auto;
+	body {
+		height: 100vh;
+		width: 100vw;
+		overflow: hidden;
+		#app {
+			height: 100%;
+			width: 100%;
+			.full-container {
+				width: 100%;
+				height: 100%;
+				overflow: auto;
+				&.none-scroll {
+					overflow: hidden;
+				}
+			}
+		}
+	}
 }
 </style>

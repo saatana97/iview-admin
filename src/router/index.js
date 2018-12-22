@@ -52,15 +52,21 @@ const router = new Router({
   ]
 });
 router.beforeEach((to, from, next) => {
-  if (['/login'].indexOf(to.fullPath) === -1 && !sessionStorage['token'] && !localStorage['token']) {
-    next('/login');
-  } else {
+  let token = sessionStorage['token'] || localStorage['token'] || false;
+  if (token) {
     if (to.fullPath === '/login') {
       next('/home');
     } else {
-      console.info('router:\t' + from.fullPath + '\t=>\t' + to.fullPath);
+      next();
+    }
+  } else {
+    if (['/login'].indexOf(to.fullPath) === -1) {
+      sessionStorage.returnRouter = to.fullPath;
+      next('/login');
+    } else {
       next();
     }
   }
+  console.info('router:\t' + from.fullPath + '\t=>\t' + to.fullPath);
 });
 export default router;
