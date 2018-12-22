@@ -49,6 +49,17 @@
 					:value="activeTab"
 				>
 					<TabPane :label="item.label" v-for="(item,index) in tabs" :key="index"></TabPane>
+					<ButtonGroup size="small" slot="extra">
+						<Button size="small" type="default" @click="goPrevTab">
+							<Icon type="ios-arrow-back"/>后退
+						</Button>
+						<Button size="small" type="default" @click="modals.clearTabsConfirm = true;">
+							<Icon type="ios-close"/>关闭全部
+						</Button>
+						<Button size="small" type="default" @click="goNextTab">前进
+							<Icon type="ios-arrow-forward"/>
+						</Button>
+					</ButtonGroup>
 				</Tabs>
 				<Layout
 					class="full-container"
@@ -58,12 +69,23 @@
 				</Layout>
 			</Layout>
 		</Layout>
+		<Modal
+			v-model="modals.clearTabsConfirm"
+			title="操作提醒"
+			@on-ok="clearTabs"
+			@on-cancel="modals.clearTabsConfirm = false;"
+		>
+			<p>确定要关闭所有标签页吗？</p>
+		</Modal>
 	</Layout>
 </template>
 <script>
 export default {
 	data() {
 		return {
+			modals: {
+				clearTabsConfirm: false
+			},
 			activeTab: 0,
 			tabs: [
 				{
@@ -148,6 +170,27 @@ export default {
 		goTab(index) {
 			this.activeTab = index;
 			this.$router.push(this.tabs[index].router);
+		},
+		goPrevTab() {
+			let index = this.activeTab - 1;
+			if (index < 0) {
+				this.$Message.info("已经是最前了");
+			} else {
+				this.goTab(index);
+			}
+		},
+		goNextTab() {
+			let index = this.activeTab + 1;
+			if (index >= this.tabs.length) {
+				this.$Message.info("已经是最后了");
+			} else {
+				this.goTab(index);
+			}
+		},
+		clearTabs() {
+			while (this.tabs.length > 1) {
+				this.handleTabRemove(this.tabs.length - 1);
+			}
 		},
 		goMenu(parents, menu) {
 			this.openMenus = [];
@@ -246,8 +289,7 @@ export default {
 	/deep/ .ivu-tabs-bar {
 		margin: 0 !important;
 	}
-	.ivu-tabs-content {
-		display: none;
+	/deep/ .ivu-tabs-content {
 		height: 1px;
 	}
 }
