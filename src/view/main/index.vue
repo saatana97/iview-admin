@@ -56,8 +56,8 @@
 						<Button size="small" type="default" @click="goPrevTab">
 							<Icon type="md-rewind"/>
 						</Button>
-						<Button size="small" type="default" @click="modals.clearTabsConfirm = true;">
-							<Icon type="ios-beaker"/>
+						<Button size="small" type="default" @click="clearTabs">
+							<Icon type="md-trash"/>
 						</Button>
 						<Button size="small" type="default" @click="goNextTab">
 							<Icon type="md-fastforward"/>
@@ -72,14 +72,6 @@
 				</Layout>
 			</Layout>
 		</Layout>
-		<Modal
-			v-model="modals.clearTabsConfirm"
-			title="操作提醒"
-			@on-ok="clearTabs"
-			@on-cancel="modals.clearTabsConfirm = false;"
-		>
-			<p>确定要关闭所有标签页吗？</p>
-		</Modal>
 	</Layout>
 </template>
 <script>
@@ -194,9 +186,17 @@ export default {
 			}
 		},
 		clearTabs() {
-			while (this.tabs.length > 1) {
-				this.handleTabRemove(this.tabs.length - 1);
-			}
+			const _this = this;
+			this.$Modal.confirm({
+				title: "操作提示",
+				content: "确定要关闭全部标签页吗？",
+				closable: true,
+				onOk: () => {
+					while (_this.tabs.length > 1) {
+						_this.handleTabRemove(_this.tabs.length - 1);
+					}
+				}
+			});
 		},
 		goMenu(parents, menu) {
 			this.openMenus = [];
