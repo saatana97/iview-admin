@@ -5,6 +5,11 @@
 		</Sider>
 		<Layout>
 			<Header class="list-header">
+				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
+				<Button icon="md-attach" type="info" @click="handleImport">导入</Button>
+				<Button icon="md-download" type="success" @click="handleExport">导出</Button>
+				<Button icon="ios-trash-outline" type="error" @click="handleDelete">删除</Button>
+				<Divider/>
 				<Input v-model="query.username" placeholder="请输入用户名" clearable style="width: 200px"/>
 				<Select
 					style="width:200px;"
@@ -28,17 +33,21 @@
 			</Header>
 			<Content class="list-content">
 				<Table
+					ref="table"
 					border
 					:columns="cols"
 					:data="list"
 					:loading="listLoading"
 					highlight-row
+					@on-row-dblclick="handleView"
 					@on-current-change="handleRowChange"
 					@on-selection-change="handleSelectedChange"
 				>
 					<template slot-scope="{ row, index }" slot="action">
-						<Button type="primary" size="small" style="margin-right: 5px" @click="handleEdit(index)">编辑</Button>
-						<Button type="error" size="small" @click="handleDelete(index)">删除</Button>
+						<ButtonGroup>
+							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
+							<Button type="error" size="small" @click="handleDelete(row,index)">删除</Button>
+						</ButtonGroup>
 					</template>
 				</Table>
 			</Content>
@@ -56,10 +65,18 @@
 				></Page>
 			</Footer>
 		</Layout>
+		<User-Form ref="userForm"></User-Form>
+		<User-View ref="userView"></User-View>
 	</Layout>
 </template>
 <script>
+import UserForm from "./form";
+import UserView from "./view";
 export default {
+	components: {
+		UserForm,
+		UserView
+	},
 	data() {
 		return {
 			query: {
@@ -158,8 +175,28 @@ export default {
 				_this.listLoading = false;
 			}, 1000);
 		},
-		handleEdit(index) {},
-		handleDelete(index) {},
+		handleCreate() {
+			this.$refs.userForm.show();
+		},
+		handleExport() {},
+		handleImport() {},
+		handleView(row, index) {
+			this.$refs.userView.show(row);
+		},
+		handleUpdate(row, index) {
+			this.$refs.userForm.show(row, "update");
+		},
+		handleDelete(row, index) {
+			const _this = this;
+			this.$Modal.confirm({
+				title: "操作提示",
+				content: "确定要删除这条数据吗？",
+				closable: true,
+				onOk: () => {
+					_this.list.splice(index, 1);
+				}
+			});
+		},
 		handlePageChange(index) {
 			this.query.page = index;
 		},
@@ -265,7 +302,11 @@ export default {
 	/deep/ .list-header {
 		background: #f8f8f9;
 		margin: 10px 0;
-		height: 10%;
+		height: 16%;
+		padding: 0 10px;
+		/deep/ .ivu-divider {
+			margin: 0;
+		}
 	}
 	/deep/ .list-sider {
 		background: #f8f8f9;
