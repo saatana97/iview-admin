@@ -4,14 +4,17 @@
 			<Menu mode="horizontal" theme="dark" active-name="1">
 				<div class="layout-logo">
 					<img src="@/assets/logo.png" alt="LOGO">
-					基于iView的管理系统框架
+					iView-admin管理系统框架
 				</div>
 				<div class="layout-nav">
-					<MenuItem name="1">
-						<Icon type="ios-navigate"></Icon>消息通知
+					<MenuItem name="2" @click.native="handleRequestFullScreen">
+						<Icon type="md-qr-scanner"/>全屏显示
 					</MenuItem>
-					<MenuItem name="2">
-						<Icon type="ios-keypad"></Icon>注销登录
+					<MenuItem name="1">
+						<Icon type="md-mail"/>消息通知
+					</MenuItem>
+					<MenuItem name="2" style="color:red;">
+						<Icon type="md-power"/>注销登录
 					</MenuItem>
 				</div>
 			</Menu>
@@ -51,13 +54,13 @@
 					<TabPane :label="item.label" v-for="(item,index) in tabs" :key="index"></TabPane>
 					<ButtonGroup size="small" slot="extra">
 						<Button size="small" type="default" @click="goPrevTab">
-							<Icon type="ios-arrow-back"/>后退
+							<Icon type="md-rewind"/>
 						</Button>
 						<Button size="small" type="default" @click="modals.clearTabsConfirm = true;">
-							<Icon type="ios-close"/>关闭全部
+							<Icon type="ios-beaker"/>
 						</Button>
-						<Button size="small" type="default" @click="goNextTab">前进
-							<Icon type="ios-arrow-forward"/>
+						<Button size="small" type="default" @click="goNextTab">
+							<Icon type="md-fastforward"/>
 						</Button>
 					</ButtonGroup>
 				</Tabs>
@@ -137,6 +140,9 @@ export default {
 		this.handleRouterChange(this.$router.history.current.fullPath);
 	},
 	methods: {
+		handleRequestFullScreen() {
+			document.body.webkitRequestFullScreen();
+		},
 		handleTabRemove(index) {
 			this.tabs.splice(index, 1);
 			if (this.tabs.length === 0) {
