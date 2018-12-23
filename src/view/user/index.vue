@@ -1,79 +1,57 @@
 <template>
-	<Layout class="full-container list-layout">
-		<Sider class="list-sider">
+	<layout-list
+		ref="list"
+		hasForm
+		:query.sync="query"
+		:list.sync="list"
+		:listLoading.sync="listLoading"
+		:cols="cols"
+		:total="totalElements"
+		:showForm="true"
+		:showView="true"
+		:showLeft="true"
+		@search="handleSearch"
+		@create="handleCreate"
+		@delete="handleDelete"
+		@update="handleUpdate"
+		@export="handleExport"
+		@import="handleImport"
+		@view="handleView"
+	>
+		<template slot="left">
 			<Tree :data="leftTree" @on-select-change="handleTreeNodeClick"></Tree>
-		</Sider>
-		<Layout>
-			<Header class="list-header">
-				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
-				<Button icon="md-attach" type="info" @click="handleImport">导入</Button>
-				<Button icon="md-download" type="success" @click="handleExport">导出</Button>
-				<Button icon="ios-trash-outline" type="error" @click="handleDelete">删除</Button>
-				<Divider/>
-				<Input v-model="query.username" placeholder="请输入用户名" clearable style="width: 200px"/>
-				<Select
-					style="width:200px;"
-					v-model="query.type"
-					filterable
-					remote
-					clearable
-					transfer
-					:remote-method="handleSearchTypeLoad"
-					:loading="searchTypeLoading"
-				>
-					<Option
-						v-for="(option, index) in selectOptions.type"
-						:value="option.value"
-						:key="index"
-					>{{option.label}}</Option>
-				</Select>
-				<DatePicker type="daterange" placement="bottom-end" placeholder="请选择日期范围" style="width: 200px"></DatePicker>
-				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
-				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
-			</Header>
-			<Content class="list-content">
-				<Table
-					ref="table"
-					border
-					:columns="cols"
-					:data="list"
-					:loading="listLoading"
-					highlight-row
-					@on-row-dblclick="handleView"
-					@on-current-change="handleRowChange"
-					@on-selection-change="handleSelectedChange"
-				>
-					<template slot-scope="{ row, index }" slot="action">
-						<ButtonGroup>
-							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
-							<Button type="error" size="small" @click="handleDelete(row,index)">删除</Button>
-						</ButtonGroup>
-					</template>
-				</Table>
-			</Content>
-			<Footer class="list-footer">
-				<Page
-					:total="totalElemens"
-					:current.sync="query.page"
-					:page-size="query.limit"
-					show-sizer
-					show-elevator
-					show-total
-					transfer
-					@on-change="handlePageChange"
-					@on-page-size-change="handleLimitChange"
-				></Page>
-			</Footer>
-		</Layout>
-		<User-Form ref="userForm"></User-Form>
-		<User-View ref="userView"></User-View>
-	</Layout>
+		</template>
+		<template slot="search">
+			<Input v-model="query.username" placeholder="请输入用户名" clearable style="width: 200px"/>
+			<Select
+				style="width:200px;"
+				v-model="query.type"
+				filterable
+				remote
+				clearable
+				transfer
+				:remote-method="handleSearchTypeLoad"
+				:loading="searchTypeLoading"
+			>
+				<Option
+					v-for="(option, index) in selectOptions.type"
+					:value="option.value"
+					:key="index"
+				>{{option.label}}</Option>
+			</Select>
+			<DatePicker type="daterange" placement="bottom-end" placeholder="请选择日期范围" style="width: 200px"></DatePicker>
+		</template>
+		<user-form ref="form" slot="form"></user-form>
+		<user-view ref="view" slot="view"></user-view>
+	</layout-list>
 </template>
 <script>
+import LayoutList from "@/components/LayoutList";
 import UserForm from "./form";
 import UserView from "./view";
 export default {
 	components: {
+		LayoutList,
 		UserForm,
 		UserView
 	},
@@ -81,11 +59,11 @@ export default {
 		return {
 			query: {
 				page: 1,
-				limie: 10
+				limit: 10
 			},
 			selectOptions: { type: [] },
 			searchTypeLoading: false,
-			totalElemens: 20,
+			totalElements: 100,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],
@@ -123,6 +101,31 @@ export default {
 			list: [
 				{
 					name: "admin",
+					age: 21,
+					address: "地球"
+				},
+				{
+					name: "test1",
+					age: 21,
+					address: "地球"
+				},
+				{
+					name: "test2",
+					age: 21,
+					address: "地球"
+				},
+				{
+					name: "test3",
+					age: 21,
+					address: "地球"
+				},
+				{
+					name: "test4",
+					age: 21,
+					address: "地球"
+				},
+				{
+					name: "test5",
 					age: 21,
 					address: "地球"
 				}
@@ -172,11 +175,30 @@ export default {
 			const _this = this;
 			this.listLoading = true;
 			setTimeout(function() {
+				_this.list = [];
+				for (let i = 0; i < _this.query.limit; i++) {
+					if (
+						_this.list.length ===
+						_this.totalElements -
+							(_this.query.page - 1) * _this.query.limit
+					) {
+						break;
+					}
+					_this.list.push({
+						name:
+							"test" +
+							(i +
+								1 +
+								(_this.query.page - 1) * _this.query.limit),
+						age: 21,
+						address: "地球"
+					});
+				}
 				_this.listLoading = false;
 			}, 1000);
 		},
 		handleCreate() {
-			this.$refs.userForm.show();
+			this.$refs.form.show();
 		},
 		handleExport() {},
 		handleImport() {},
@@ -184,30 +206,10 @@ export default {
 			this.$refs.userView.show(row);
 		},
 		handleUpdate(row, index) {
-			this.$refs.userForm.show(row, "update");
+			this.$refs.form.show(row, "update");
 		},
-		handleDelete(row, index) {
-			const _this = this;
-			this.$Modal.confirm({
-				title: "操作提示",
-				content: "确定要删除这条数据吗？",
-				closable: true,
-				onOk: () => {
-					_this.list.splice(index, 1);
-				}
-			});
-		},
-		handlePageChange(index) {
-			this.query.page = index;
-		},
-		handleLimitChange(size) {
-			this.query.limie = size;
-		},
-		handleRowChange(currentRow, lastRow) {
-			this.currentRow = currentRow;
-		},
-		handleSelectedChange(selected) {
-			this.selectedRows = selected;
+		handleDelete(rows) {
+			alert("delete " + rows.length);
 		},
 		handleTreeNodeClick(selected, currentNode) {},
 		handleSearchTypeLoad(query) {

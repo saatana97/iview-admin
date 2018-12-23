@@ -6,7 +6,7 @@
 		</template>
 		<CellGroup>
 			<Cell title="姓名" label="name" :extra="form.name"/>
-			<Cell title="年龄" label="age" :extra="form.age"/>
+			<Cell title="年龄" label="age" :extra="form.age+''"/>
 			<Cell title="地址" label="address" :extra="form.address"/>
 			<Cell title="创建者" label="creator" :extra="form.creator"/>
 			<Cell title="创建时间" label="createDate" :extra="form.createDate"/>

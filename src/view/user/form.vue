@@ -56,7 +56,7 @@ export default {
 	methods: {
 		show(row, type) {
 			this.visiable = true;
-			this.form = row || {};
+			this.form = row ? JSON.parse(JSON.stringify(row)) : {};
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 		},
