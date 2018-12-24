@@ -203,7 +203,7 @@ export default {
 .list-layout {
 	background: white;
 	.ivu-layout {
-		padding: 0 10px;
+		padding: 10px;
 		background: white;
 		height: 100%;
 		display: flex;
@@ -215,7 +215,6 @@ export default {
 	/deep/ .list-header {
 		border: 1px #e8eaec solid;
 		background: #f8f8f9;
-		margin: 10px 0;
 		height: 16%;
 		padding: 0 10px;
 		/deep/ .ivu-divider {
@@ -226,14 +225,16 @@ export default {
 		margin: 10px 0 10px 10px;
 		padding: 10px;
 		border: 1px #e8eaec solid;
+		background: #f8f8f9;
 	}
 	/deep/ .list-content {
 		height: 80%;
+		margin-top: 10px;
 		overflow: auto;
 	}
 	/deep/ .list-footer {
 		border: 1px #e8eaec solid;
-		margin: 10px 0;
+		margin-top: 10px;
 		padding: 20px;
 	}
 	/deep/ .ivu-table-wrapper {
