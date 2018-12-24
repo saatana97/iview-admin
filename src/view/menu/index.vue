@@ -8,8 +8,10 @@
 		:cols="cols"
 		:showExport="false"
 		:showImport="false"
+		:showLeft="true"
 		:showForm="true"
 		:showView="true"
+		:showPage="false"
 		@search="handleSearch"
 		@create="handleCreate"
 		@delete="handleDelete"
@@ -20,6 +22,9 @@
 		<menu-view ref="view" slot="view"></menu-view>
 		<template slot="search">
 			<Input v-model="query.name" placeholder="请输入菜单名" clearable style="width: 200px"/>
+		</template>
+		<template slot="left">
+			<Tree :data="menus" @on-select-change="handleTreeNodeClick"></Tree>
 		</template>
 		<template slot-scope="{ row, index }" slot="action">
 			<Button type="info" size="small" @click="handleDelete(row,index)">添加下级菜单</Button>
@@ -46,43 +51,75 @@ export default {
 		return {
 			listLoading: false,
 			query: { page: 1, limit: 10 },
-			list: [
-				{
-					name: "admin",
-					age: 21,
-					address: "地球",
-					loginDate: new Date()
-				}
-			],
+			list: [],
 			cols: [
 				{ type: "selection", width: 60, align: "center" },
-				{ type: "index", width: 80, align: "center" },
+				{ type: "index", title: "序号", width: 80, align: "center" },
 				{
-					title: "Name",
-					key: "name"
+					title: "名称",
+					key: "title"
 				},
 				{
-					title: "Age",
-					key: "age"
+					title: "代码",
+					key: "code"
 				},
 				{
-					title: "LoginDate",
-					render: (h, params) => {
-						return h("span", fmt(params.row.loginDate));
-					}
+					title: "路由",
+					key: "router"
 				},
 				{
-					title: "Address",
-					key: "address"
-				},
-				{
-					title: "Action",
+					title: "操作",
 					slot: "action",
 					align: "center",
 					width: 250
 				}
+			],
+			menus: [
+				{
+					title: "系统设置",
+					expand: true,
+					code: "systemSetting",
+					router: "/sys",
+					children: [
+						{
+							title: "菜单管理",
+							expand: true,
+							code: "menuManager",
+							router: "/sys/menu"
+						},
+						{
+							title: "用户管理",
+							expand: true,
+							code: "userManager",
+							router: "/sys/user"
+						}
+					]
+				},
+				{
+					title: "个人中心",
+					expand: true,
+					code: "owner",
+					router: "/owner",
+					children: [
+						{
+							title: "个人资料",
+							expand: true,
+							code: "userInfo",
+							router: "/owner/userinfo"
+						},
+						{
+							title: "通讯录",
+							expand: true,
+							code: "concact",
+							router: "/owner/concact"
+						}
+					]
+				}
 			]
 		};
+	},
+	created() {
+		this.list = this.handleTreeToArray(this.menus);
 	},
 	methods: {
 		handleSearch() {
@@ -102,6 +139,24 @@ export default {
 		},
 		handleUpdate(row, index) {
 			this.$refs.form.show(row, "update");
+		},
+		handleTreeNodeClick(arr, node) {
+			if (arr.length === 0) {
+				arr = this.menus;
+			}
+			this.list = this.handleTreeToArray(arr);
+		},
+		handleTreeToArray(arr) {
+			let res = [];
+			(function scanle(arr, res) {
+				if (arr instanceof Array) {
+					arr.forEach(item => {
+						res.push(item);
+						scanle(item.children, res);
+					});
+				}
+			})(arr, res);
+			return res;
 		}
 	}
 };
