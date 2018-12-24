@@ -51,7 +51,16 @@
 					@on-click="handleTabClick"
 					:value="activeTab"
 				>
-					<TabPane :label="item.label" v-for="(item,index) in tabs" :key="index"></TabPane>
+					<TabPane :label="item.label" v-for="(item,index) in tabs" :key="index">
+						<Layout
+							class="full-container"
+							:style="{background:'white',border:'1px solid #dcdee2',borderTop:'none'}"
+						>
+							<keep-alive>
+								<router-view/>
+							</keep-alive>
+						</Layout>
+					</TabPane>
 					<ButtonGroup size="small" slot="extra">
 						<Button size="small" type="default" @click="goPrevTab">
 							<Icon type="md-rewind"/>
@@ -64,12 +73,6 @@
 						</Button>
 					</ButtonGroup>
 				</Tabs>
-				<Layout
-					class="full-container"
-					:style="{background:'white',border:'1px solid #dcdee2',borderTop:'none'}"
-				>
-					<router-view/>
-				</Layout>
 			</Layout>
 		</Layout>
 	</Layout>
@@ -292,11 +295,17 @@ export default {
 	.ivu-layout-header {
 		padding: 0;
 	}
+	/deep/ .ivu-tabs-card {
+		height: 100%;
+	}
+	/deep/ .ivu-tabs-tabpane {
+		height: 96%;
+	}
 	/deep/ .ivu-tabs-bar {
 		margin: 0 !important;
 	}
 	/deep/ .ivu-tabs-content {
-		height: 1px;
+		height: 100%;
 	}
 }
 </style>
