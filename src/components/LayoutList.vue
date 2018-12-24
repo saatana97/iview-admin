@@ -213,6 +213,7 @@ export default {
 }
 * {
 	/deep/ .list-header {
+		border: 1px #e8eaec solid;
 		background: #f8f8f9;
 		margin: 10px 0;
 		height: 16%;
@@ -222,15 +223,16 @@ export default {
 		}
 	}
 	/deep/ .list-sider {
-		background: #f8f8f9;
-		margin: 10px;
+		margin: 10px 0 10px 10px;
+		padding: 10px;
+		border: 1px #e8eaec solid;
 	}
 	/deep/ .list-content {
 		height: 80%;
 		overflow: auto;
 	}
 	/deep/ .list-footer {
-		background: #f8f8f9;
+		border: 1px #e8eaec solid;
 		margin: 10px 0;
 		padding: 20px;
 	}
