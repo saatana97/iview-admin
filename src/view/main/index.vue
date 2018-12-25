@@ -13,7 +13,7 @@
 					<MenuItem name="1">
 						<Icon type="md-mail"/>消息通知
 					</MenuItem>
-					<MenuItem name="2" style="color:red;">
+					<MenuItem name="2" style="color:red;" @click.native="handleLogout">
 						<Icon type="md-power"/>注销登录
 					</MenuItem>
 				</div>
@@ -31,15 +31,18 @@
 				>
 					<Submenu :name="item.code" v-for="(item,index) in menus" :key="index">
 						<template slot="title">
-							<Icon type="ios-navigate"></Icon>
-							{{item.name}}
+							<Icon :type="item.icon"></Icon>
+							{{item.title}}
 						</template>
 						<MenuItem
 							:name="children.code"
 							v-for="(children,cindex) in item.children"
 							:key="cindex"
 							:to="children.router"
-						>{{children.name}}</MenuItem>
+						>
+							<Icon :type="children.icon"></Icon>
+							{{children.title}}
+						</MenuItem>
 					</Submenu>
 				</Menu>
 			</Sider>
@@ -78,6 +81,7 @@
 	</Layout>
 </template>
 <script>
+import MenuApi from "@/api/menu";
 export default {
 	data() {
 		return {
@@ -91,57 +95,23 @@ export default {
 					router: "/home"
 				}
 			],
-			menus: [
-				{
-					name: "系统设置",
-					code: "systemSetting",
-					router: "/sys",
-					children: [
-						{
-							name: "菜单管理",
-							code: "menuManager",
-							router: "/sys/menu"
-						},
-						{
-							name: "用户管理",
-							code: "userManager",
-							router: "/sys/user"
-						},
-						{
-							name: "角色管理",
-							code: "roleManager",
-							router: "/sys/role"
-						}
-					]
-				},
-				{
-					name: "个人中心",
-					code: "owner",
-					router: "/owner",
-					children: [
-						{
-							name: "个人资料",
-							code: "userInfo",
-							router: "/owner/userinfo"
-						},
-						{
-							name: "通讯录",
-							code: "concact",
-							router: "/owner/concact"
-						}
-					]
-				}
-			],
-			activeMenu: "userManager",
-			openMenus: ["systemSetting"]
+			menus: [],
+			activeMenu: "",
+			openMenus: []
 		};
 	},
-	created() {
+	async created() {
+		this.menus = await MenuApi.Tree();
 		this.handleRouterChange(this.$router.history.current.fullPath);
 	},
 	methods: {
 		handleRequestFullScreen() {
 			document.body.webkitRequestFullScreen();
+		},
+		handleLogout() {
+			sessionStorage.clear();
+			localStorage.clear();
+			this.$router.push("/login");
 		},
 		handleTabRemove(index) {
 			this.tabs.splice(index, 1);
