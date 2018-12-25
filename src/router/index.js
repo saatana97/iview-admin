@@ -5,6 +5,7 @@ import Main from '@/view/main/index';
 import Home from '@/view/home/index';
 import User from '@/view/user/index';
 import Menu from '@/view/menu/index';
+import Role from '@/view/role/index';
 import UserInfo from '@/view/userinfo/index';
 import Concact from '@/view/concact/index';
 
@@ -36,6 +37,11 @@ const router = new Router({
           path: '/sys/menu',
           name: 'Menu',
           component: Menu
+        },
+        {
+          path: '/sys/role',
+          name: 'Role',
+          component: Role
         },
         {
           path: '/owner/userinfo',
