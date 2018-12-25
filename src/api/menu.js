@@ -1,6 +1,6 @@
 import { Post } from './ajax';
 import Base from './base';
 const api = {
-  ...Base('role')
+  ...Base('menu')
 };
 export default api;
