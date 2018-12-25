@@ -49,6 +49,7 @@
 </template>
 <script>
 import VueParticles from "vue-particles/src/vue-particles/vue-particles";
+import AuthApi from "@/api/auth";
 export default {
 	components: { VueParticles },
 	data() {
@@ -85,13 +86,14 @@ export default {
 	},
 	methods: {
 		handleLogin() {
-			this.$refs["loginForm"].validate(valid => {
+			this.$refs["loginForm"].validate(async valid => {
 				if (valid) {
+					let res = await AuthApi.Login(this.form);
 					let storage = sessionStorage;
 					if (this.form.remeber) {
 						storage = localStorage;
 					}
-					storage.token = "admin";
+					storage.token = res.token;
 					let returnRouter = sessionStorage.returnRouter || "/home";
 					this.$router.push(returnRouter);
 					this.$Message.success("登陆成功");
@@ -104,6 +106,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+* {
+	font-size: 12px;
+}
 .layout-container {
 	color: white;
 	background: #515a6e;
@@ -112,13 +117,14 @@ export default {
 	overflow: hidden;
 	.login-box {
 		padding: 50px;
-		width: 24%;
-		height: 40%;
+		width: max-content;
+		min-width: 25%;
 		top: 20%;
 		left: 38%;
 		position: fixed;
 		background: rgba(0, 0, 0, 0.3);
 		.layout-logo {
+			font-size: 2rem;
 			text-align: center;
 			height: 50px;
 			line-height: 50px;
