@@ -8,15 +8,21 @@
 	>
 		<template slot="header" v-if="type === 'create'">
 			<Icon type="md-add-circle"/>
-			<span>添加用户</span>
+			<span>添加角色</span>
 		</template>
 		<template slot="header" v-else>
 			<Icon type="ios-create"/>
-			<span>编辑用户</span>
+			<span>编辑角色</span>
 		</template>
 		<Form :model="form" :rules="rules" :label-width="80" ref="form">
-			<FormItem label="姓名" prop="name">
-				<Input v-model="form.name" clearable placeholder="Enter something..."></Input>
+			<FormItem label="名称" prop="name">
+				<Input v-model="form.name" clearable placeholder="请输入角色名称"></Input>
+			</FormItem>
+			<FormItem label="代码" prop="code">
+				<Input v-model="form.code" clearable placeholder="请输入角色代码"></Input>
+			</FormItem>
+			<FormItem label="权限" prop="menus">
+				<TreeSelection checkbox placeholder="请选择角色权限" :serialized="false" :data="menuTree"></TreeSelection>
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
@@ -34,24 +40,42 @@
 	</Modal>
 </template>
 <script>
+import TreeSelection from "@/components/TreeSelection";
+import MenuApi from "@/api/menu";
 export default {
+	components: {
+		TreeSelection
+	},
 	data() {
 		return {
 			visiable: false,
 			loading: false,
 			type: "create",
+			menusName: "",
 			form: {},
+			menuTree: [],
 			_form: "",
 			rules: {
 				name: [
 					{
 						required: true,
-						message: "用户名不能为空",
+						message: "角色名称不能为空",
+						trigger: "change"
+					}
+				],
+				code: [
+					{
+						required: true,
+						message: "角色代码不能为空",
 						trigger: "change"
 					}
 				]
 			}
 		};
+	},
+	async created() {
+		let res = await MenuApi.Tree();
+		this.menuTree = res.data || [];
 	},
 	methods: {
 		show(row, type) {

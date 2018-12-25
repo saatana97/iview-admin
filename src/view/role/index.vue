@@ -23,20 +23,20 @@
 		<template slot="table">
 			<template slot="menus" slot-scope="{ row, index }">{{row.menus.length}}</template>
 		</template>
-		<user-form ref="form" slot="form"></user-form>
-		<user-view ref="view" slot="view"></user-view>
+		<form-modal ref="form" slot="form"></form-modal>
+		<view-modal ref="view" slot="view"></view-modal>
 	</layout-list>
 </template>
 <script>
-import { Page } from "@/api/role";
+import RoleApi from "@/api/role";
 import LayoutList from "@/components/LayoutList";
-import UserForm from "./form";
-import UserView from "./view";
+import FormModal from "./form";
+import ViewModal from "./view";
 export default {
 	components: {
 		LayoutList,
-		UserForm,
-		UserView
+		FormModal,
+		ViewModal
 	},
 	data() {
 		return {
@@ -86,7 +86,7 @@ export default {
 	methods: {
 		async handleSearch() {
 			const _this = this;
-			let res = await Page(this.query);
+			let res = await RoleApi.Page(this.query);
 			this.list = res.content;
 			this.totalElements = res.totalElements;
 			this.listLoading = false;
