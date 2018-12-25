@@ -18,8 +18,8 @@
 		@update="handleUpdate"
 		@view="handleView"
 	>
-		<menu-form ref="form" slot="form"></menu-form>
-		<menu-view ref="view" slot="view"></menu-view>
+		<FormModal ref="form" slot="form" @save="handleSearch"></FormModal>
+		<ViewModal ref="view" slot="view"></ViewModal>
 		<template slot="search">
 			<Input v-model="query.name" placeholder="请输入菜单名" clearable style="width: 200px"/>
 		</template>
@@ -32,9 +32,10 @@
 	</layout-list>
 </template>
 <script>
+import MenuApi from "@/api/menu";
 import LayoutList from "@/components/LayoutList";
-import MenuForm from "@/view/user/form";
-import MenuView from "@/view/user/view";
+import FormModal from "./form";
+import ViewModal from "./view";
 function fmt(date) {
 	if (date instanceof Date) {
 		return `${date.getFullYear()}年${date.getMonth() +
@@ -44,8 +45,8 @@ function fmt(date) {
 export default {
 	components: {
 		LayoutList,
-		MenuForm,
-		MenuView
+		FormModal,
+		ViewModal
 	},
 	data() {
 		return {
@@ -119,14 +120,14 @@ export default {
 		};
 	},
 	created() {
-		this.list = this.handleTreeToArray(this.menus);
+		this.handleSearch();
 	},
 	methods: {
-		handleSearch() {
+		async handleSearch() {
 			const _this = this;
-			setTimeout(() => {
-				_this.listLoading = false;
-			}, 1000);
+			this.menus = await MenuApi.Tree();
+			this.list = this.handleTreeToArray(this.menus);
+			_this.listLoading = false;
 		},
 		handleCreate() {
 			this.$refs.form.show();
