@@ -57,7 +57,7 @@
 							:style="{background:'white',border:'1px solid #dcdee2',borderTop:'none'}"
 						>
 							<keep-alive>
-								<router-view/>
+								<router-view v-if="index === activeTab"/>
 							</keep-alive>
 						</Layout>
 					</TabPane>
@@ -106,6 +106,11 @@ export default {
 							name: "用户管理",
 							code: "userManager",
 							router: "/sys/user"
+						},
+						{
+							name: "角色管理",
+							code: "roleManager",
+							router: "/sys/role"
 						}
 					]
 				},
