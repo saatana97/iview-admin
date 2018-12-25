@@ -20,6 +20,7 @@ export default {
 	padding: 0;
 	position: relative;
 	border: none;
+	font-size: 14px;
 	body {
 		height: 100vh;
 		width: 100vw;
