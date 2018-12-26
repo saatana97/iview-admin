@@ -31,6 +31,7 @@
 				<InputNumber v-model="form.sort" style="width:100%;"></InputNumber>
 			</FormItem>
 			<FormItem label="上级菜单" prop="parent">
+				<Input v-model="form.parent.title" clearable placeholder="请选择上级菜单" readonly style="width:80%"></Input>
 				<TreeSelection placeholder="请选择上级菜单" title="请选择上级菜单" :data="tree" @ok="handleTreeOk"></TreeSelection>
 			</FormItem>
 			<FormItem label="备注" prop="description">
@@ -60,7 +61,7 @@ export default {
 			visiable: false,
 			loading: false,
 			type: "create",
-			form: {},
+			form: { parent: { title: "" } },
 			_form: "",
 			tree: [],
 			rules: {
@@ -94,7 +95,9 @@ export default {
 	methods: {
 		show(row, type) {
 			this.visiable = true;
-			this.form = row ? JSON.parse(JSON.stringify(row)) : {};
+			this.form = row
+				? JSON.parse(JSON.stringify(row))
+				: { parent: { title: "" } };
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 		},
@@ -106,9 +109,13 @@ export default {
 			this.$refs.form.validate(async res => {
 				this.loading = true;
 				if (res) {
-					let Save = _this.form.id ? MenuApi.Update : MenuApi.Create;
-					await Save(this.form);
-					this.$emit("save", this.form);
+					let data = { ...this.form };
+					if (typeof data.parent.id === "undefined") {
+						delete data.parent;
+					}
+					let Save = data.id ? MenuApi.Update : MenuApi.Create;
+					await Save(data);
+					this.$emit("save", data);
 					this.visiable = false;
 				} else {
 					setTimeout(() => {

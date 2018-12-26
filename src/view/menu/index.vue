@@ -27,7 +27,7 @@
 			<Tree :data="menus" @on-select-change="handleTreeNodeClick"></Tree>
 		</template>
 		<template slot-scope="{ row, index }" slot="action">
-			<Button type="info" size="small" @click="handleDelete(row,index)">添加下级菜单</Button>
+			<Button type="info" size="small" @click="handleChildren(row,index)">添加下级菜单</Button>
 		</template>
 	</layout-list>
 </template>
@@ -51,7 +51,7 @@ export default {
 	data() {
 		return {
 			listLoading: false,
-			query: { page: 1, limit: 10 },
+			query: { page: 1, limit: 10, name: "" },
 			list: [],
 			cols: [
 				{ type: "selection", width: 60, align: "center" },
@@ -127,7 +127,16 @@ export default {
 			const _this = this;
 			this.menus = await MenuApi.Tree();
 			this.list = this.handleTreeToArray(this.menus);
+			this.handleFilter();
 			_this.listLoading = false;
+		},
+		handleFilter() {
+			const _this = this;
+			if (this.query.name) {
+				this.list = this.list.filter(item => {
+					return new RegExp(_this.query.name).test(item.title);
+				});
+			}
 		},
 		handleCreate() {
 			this.$refs.form.show();
@@ -135,8 +144,15 @@ export default {
 		handleView(row, index) {
 			this.$refs.view.show(row);
 		},
-		handleDelete(rows) {
-			alert("delete " + rows.length);
+		async handleDelete(rows) {
+			let ids = [];
+			rows.forEach(item => {
+				ids.push(item.id);
+			});
+			await MenuApi.RemoveAll(ids);
+		},
+		handleChildren(row, index) {
+			this.$refs.form.show({ parent: row }, "create");
 		},
 		handleUpdate(row, index) {
 			this.$refs.form.show(row, "update");
@@ -146,17 +162,19 @@ export default {
 				arr = this.menus;
 			}
 			this.list = this.handleTreeToArray(arr);
+			this.handleFilter();
 		},
 		handleTreeToArray(arr) {
 			let res = [];
-			(function scanle(arr, res) {
+			(function scanle(parent, arr, res) {
 				if (arr instanceof Array) {
 					arr.forEach(item => {
+						item.parent = { ...parent, children: [] };
 						res.push(item);
-						scanle(item.children, res);
+						scanle(item, item.children, res);
 					});
 				}
-			})(arr, res);
+			})({}, arr, res);
 			return res;
 		}
 	}
