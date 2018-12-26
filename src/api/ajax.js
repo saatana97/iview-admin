@@ -25,12 +25,14 @@ export async function Post(url, data) {
     res = await service({ url, data, method: 'post' });
   } catch (e) {
     console.warn(e);
-    alert('网络连接异常');
+    app.$Message.error('网络连接异常');
   }
   res = res.data || {};
   if (res.status && res.status !== 200) {
-    alert(res.data || res.message);
+    app.$Message.error(res.data || res.message);
     if (res.status === 401) {
+      sessionStorage.clear();
+      localStorage.clear();
       app.$router.push('/login');
     }
     res = {};
