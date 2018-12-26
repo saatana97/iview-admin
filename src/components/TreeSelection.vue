@@ -1,10 +1,6 @@
 <template>
 	<div class="tree-selection">
-		<slot v-if="showInput" :label="label">
-			<Input class="input" :value="label" :clearable="clearable" :placeholder="placeholder"></Input>
-		</slot>
 		<Button @click="handleClick" class="btn">
-			<!-- <Icon type="md-list-box"/> -->
 			<Icon type="md-options"/>
 		</Button>
 		<Modal
@@ -22,7 +18,6 @@
 <script>
 export default {
 	props: {
-		showInput: { default: true, type: Boolean },
 		clearable: { default: true, type: Boolean },
 		placeholder: { default: "请选择", type: String },
 		serialized: { default: true, type: Boolean },
@@ -118,12 +113,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .tree-selection {
-	.input {
-		width: calc(95% - 50px);
-	}
+	float: right;
 	.btn {
 		padding: 3px 10px;
-		float: right;
 		width: 50px;
 	}
 }
