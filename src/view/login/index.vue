@@ -35,7 +35,7 @@
 					</Input>
 				</FormItem>
 				<FormItem>
-					<Button type="primary" @click="handleLogin" long>登 陆</Button>
+					<Button type="primary" @click="handleLogin" long :loading="loading">登 陆</Button>
 				</FormItem>
 				<FormItem label="自动登录">
 					<i-Switch size="large" v-model="form.remeber">
@@ -54,6 +54,7 @@ export default {
 	components: { VueParticles },
 	data() {
 		return {
+			loading: false,
 			form: {
 				username: "admin",
 				password: "123456",
@@ -88,6 +89,7 @@ export default {
 		handleLogin() {
 			this.$refs["loginForm"].validate(async valid => {
 				if (valid) {
+					this.loading = true;
 					let res = await AuthApi.Login(this.form);
 					let storage = sessionStorage;
 					if (this.form.remeber) {
@@ -97,6 +99,7 @@ export default {
 					let returnRouter = sessionStorage.returnRouter || "/home";
 					this.$router.push(returnRouter);
 					this.$Message.success("登陆成功");
+					this.loading = false;
 				} else {
 					this.$Message.error("登录失败");
 				}
