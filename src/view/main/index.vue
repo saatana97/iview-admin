@@ -219,7 +219,7 @@ export default {
 				return res;
 			})(this.menus);
 			if (!tab && menu) {
-				this.addTab(menu.name, menu.router);
+				this.addTab(menu.title, menu.router);
 			}
 			this.goMenu(parents, menu);
 		}
