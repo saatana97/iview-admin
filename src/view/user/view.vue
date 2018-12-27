@@ -13,6 +13,13 @@
 			<Cell title="最后更新者" label="updator" :extra="form.updator"/>
 			<Cell title="最后更新时间" label="updateDate" :extra="form.updateDate"/>
 			<Cell title="最后登陆时间" label="loginDate" :extra="form.loginDate"/>
+			<Input
+				v-model="form.description"
+				type="textarea"
+				readonly
+				:autosize="{minRows: 2,maxRows: 5}"
+				placeholder="暂无备注信息"
+			/>
 		</CellGroup>
 	</Modal>
 </template>

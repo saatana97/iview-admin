@@ -36,7 +36,7 @@
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
-					v-model="form.textarea"
+					v-model="form.description"
 					type="textarea"
 					:autosize="{minRows: 2,maxRows: 5}"
 					:maxlength="255"
