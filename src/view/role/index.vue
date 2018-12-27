@@ -21,6 +21,10 @@
 			<Input v-model="query.name" placeholder="请输入角色名" clearable style="width: 200px"/>
 			<Input v-model="query.code" placeholder="请输入角色代码" clearable style="width: 200px"/>
 		</template>
+		<template slot-scope="{ row, index }" slot="action">
+			<Button type="info" size="small" @click="handleDispatch(row,index)">分配用户</Button>
+			<dispatch ref="dispatch"/>
+		</template>
 		<form-modal ref="form" slot="form" @save="handleSearch"></form-modal>
 		<view-modal ref="view" slot="view"></view-modal>
 	</layout-list>
@@ -30,11 +34,13 @@ import RoleApi from "@/api/role";
 import LayoutList from "@/components/LayoutList";
 import FormModal from "./form";
 import ViewModal from "./view";
+import Dispatch from "./dispatch";
 export default {
 	components: {
 		LayoutList,
 		FormModal,
-		ViewModal
+		ViewModal,
+		Dispatch
 	},
 	data() {
 		return {
@@ -73,7 +79,7 @@ export default {
 				{
 					title: "操作",
 					slot: "action",
-					width: 150,
+					width: 250,
 					align: "center"
 				}
 			],
@@ -91,13 +97,14 @@ export default {
 		handleCreate() {
 			this.$refs.form.show();
 		},
-		handleExport() {},
-		handleImport() {},
 		handleView(row, index) {
 			this.$refs.view.show(row);
 		},
 		handleUpdate(row, index) {
 			this.$refs.form.show(row, "update");
+		},
+		handleDispatch(row, index) {
+			this.$refs.dispatch.show(row);
 		},
 		async handleDelete(rows) {
 			let ids = [];
