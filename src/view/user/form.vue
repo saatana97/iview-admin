@@ -23,7 +23,8 @@
 					v-model="form.textarea"
 					type="textarea"
 					:autosize="{minRows: 2,maxRows: 5}"
-					placeholder="Enter something..."
+					:maxlength="255"
+					placeholder="请输入备注信息"
 				></Input>
 			</FormItem>
 		</Form>

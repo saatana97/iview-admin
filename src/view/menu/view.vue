@@ -13,6 +13,7 @@
 					<Icon :type="form.icon"/>
 				</template>
 			</Cell>
+			<Cell title="备注" label="description" :extra="form.description"/>
 			<Cell title="创建者" label="creator" :extra="form.creatorUsername"/>
 			<Cell title="创建时间" label="createDate" :extra="form.createDate"/>
 			<Cell title="最后更新者" label="updator" :extra="form.updatorUsername"/>
