@@ -11,6 +11,7 @@
 			<Cell title="创建时间" label="createDate" :extra="form.createDate"/>
 			<Cell title="最后更新者" label="updator" :extra="form.updatorUsername"/>
 			<Cell title="最后更新时间" label="updateDate" :extra="form.updateDate"/>
+			<Input v-model="form.menusName" type="textarea" readonly :autosize="{minRows: 2,maxRows: 5}"/>
 			<Input
 				v-model="form.description"
 				type="textarea"

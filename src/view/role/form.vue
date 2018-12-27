@@ -4,6 +4,7 @@
 		:mask-closable="false"
 		:closable="false"
 		scrollable
+		:width="540"
 		@on-visible-change="handleVisiableChange"
 	>
 		<template slot="header" v-if="type === 'create'">
@@ -22,7 +23,12 @@
 				<Input v-model="form.code" clearable placeholder="请输入角色代码"></Input>
 			</FormItem>
 			<FormItem label="权限" prop="menus">
-				<TreeSelection checkbox placeholder="请选择角色权限" :serialized="false" :data="menuTree"></TreeSelection>
+				<Transfer
+					:data="menus"
+					:target-keys="targetKeys"
+					:titles="['未分配权限','已拥有权限']"
+					@on-change="handleTransfer"
+				></Transfer>
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
@@ -43,6 +49,7 @@
 <script>
 import TreeSelection from "@/components/TreeSelection";
 import MenuApi from "@/api/menu";
+import RoleApi from "@/api/role";
 export default {
 	components: {
 		TreeSelection
@@ -52,9 +59,9 @@ export default {
 			visiable: false,
 			loading: false,
 			type: "create",
-			menusName: "",
-			form: {},
-			menuTree: [],
+			form: { menus: [], menusName: "" },
+			targetKeys: [],
+			menus: [],
 			_form: "",
 			rules: {
 				name: [
@@ -70,26 +77,55 @@ export default {
 						message: "角色代码不能为空",
 						trigger: "change"
 					}
+				],
+				menus: [
+					{
+						validator: (rule, value, cb) => {
+							if (value instanceof Array && value.length > 0) {
+								cb();
+							} else {
+								cb(new Error());
+							}
+						},
+						message: "角色权限不能为空",
+						trigger: "change"
+					}
 				]
 			}
 		};
 	},
 	async created() {
-		let res = await MenuApi.Tree();
-		this.menuTree = res.data || [];
+		const _this = this;
+		((await MenuApi.List({})) || []).forEach(menu => {
+			_this.menus.push({
+				key: menu.id,
+				label: menu.title,
+				description: menu.description,
+				disabled: false
+			});
+		});
 	},
 	methods: {
 		show(row, type) {
 			this.visiable = true;
-			this.form = row ? JSON.parse(JSON.stringify(row)) : {};
+			this.form = row
+				? JSON.parse(JSON.stringify(row))
+				: { menus: [], menusName: "" };
+			this.targetKeys = this.form.menus.map(item => {
+				return item.id;
+			});
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 		},
 		handleSave() {
 			const _this = this;
-			this.$refs.form.validate(res => {
+			this.$refs.form.validate(async res => {
 				this.loading = true;
 				if (res) {
+					let data = { ...this.form };
+					let Save = data.id ? RoleApi.Update : RoleApi.Create;
+					await Save(data);
+					this.$emit("save", data);
 					this.visiable = false;
 				} else {
 					setTimeout(() => {
@@ -97,6 +133,21 @@ export default {
 					}, 1000);
 				}
 			});
+		},
+		handleTransfer(targetKeys, direction, moveKeys) {
+			if (direction === "right") {
+				this.targetKeys = moveKeys;
+			} else if (direction === "left") {
+				this.targetKeys = targetKeys;
+			}
+			const _this = this;
+			this.form.menus = [];
+			Array.prototype.push.apply(
+				this.form.menus,
+				_this.targetKeys.map(item => {
+					return { id: item };
+				})
+			);
 		},
 		handleVisiableChange(visiable) {
 			if (!visiable) {

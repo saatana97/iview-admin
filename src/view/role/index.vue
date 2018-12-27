@@ -18,12 +18,10 @@
 		@view="handleView"
 	>
 		<template slot="search">
-			<Input v-model="query.username" placeholder="请输入角色名" clearable style="width: 200px"/>
+			<Input v-model="query.name" placeholder="请输入角色名" clearable style="width: 200px"/>
+			<Input v-model="query.code" placeholder="请输入角色代码" clearable style="width: 200px"/>
 		</template>
-		<template slot="table">
-			<template slot="menus" slot-scope="{ row, index }">{{row.menus.length}}</template>
-		</template>
-		<form-modal ref="form" slot="form"></form-modal>
+		<form-modal ref="form" slot="form" @save="handleSearch"></form-modal>
 		<view-modal ref="view" slot="view"></view-modal>
 	</layout-list>
 </template>
@@ -70,8 +68,7 @@ export default {
 				},
 				{
 					title: "权限",
-					key: "menus",
-					slot: "menus"
+					key: "menusName"
 				},
 				{
 					title: "操作",
@@ -102,8 +99,12 @@ export default {
 		handleUpdate(row, index) {
 			this.$refs.form.show(row, "update");
 		},
-		handleDelete(rows) {
-			alert("delete " + rows.length);
+		async handleDelete(rows) {
+			let ids = [];
+			rows.forEach(item => {
+				ids.push(item.id);
+			});
+			await RoleApi.RemoveAll(ids);
 		}
 	}
 };
