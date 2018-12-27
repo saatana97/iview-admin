@@ -8,7 +8,7 @@ export default controller => {
       return Post(controller + '/all');
     },
     List(data) {
-      return Post(controller + '/list');
+      return Post(controller + '/list', data);
     },
     Page(data) {
       return Post(controller + '/page', data);
