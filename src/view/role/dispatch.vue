@@ -12,7 +12,7 @@
 		<Transfer
 			:data="auths"
 			:target-keys="targetKeys"
-			:titles="['未分配用户','已拥有用户']"
+			:titles="['未分配用户','已分配用户']"
 			@on-change="handleTransfer"
 		></Transfer>
 		<template slot="footer">

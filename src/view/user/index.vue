@@ -50,24 +50,24 @@
 				></Page>
 			</Footer>
 		</Layout>
-		<User-Form ref="userForm" @save="handleSearch"></User-Form>
-		<User-View ref="userView"></User-View>
+		<FormModal ref="form" @save="handleSearch"></FormModal>
+		<ViewModal ref="view"></ViewModal>
 	</Layout>
 </template>
 <script>
-import UserForm from "./form";
-import UserView from "./view";
-import UserApi from "@/api/user";
+import FormModal from "./form";
+import ViewModal from "./view";
+import API from "@/api/user";
 export default {
 	components: {
-		UserForm,
-		UserView
+		FormModal,
+		ViewModal
 	},
 	data() {
 		return {
 			query: {
 				page: 1,
-				limie: 10,
+				limit: 10,
 				authorizer: {}
 			},
 			totalElemens: 20,
@@ -116,21 +116,21 @@ export default {
 		async handleSearch() {
 			const _this = this;
 			this.listLoading = true;
-			let res = await UserApi.Page(this.query);
+			let res = await API.Page(this.query);
 			this.list = res.content;
 			this.totalElemens = res.totalElemens;
 			this.listLoading = false;
 		},
 		handleCreate() {
-			this.$refs.userForm.show();
+			this.$refs.form.show();
 		},
 		handleExport() {},
 		handleImport() {},
 		handleView(row, index) {
-			this.$refs.userView.show(row);
+			this.$refs.view.show(row);
 		},
 		handleUpdate(row, index) {
-			this.$refs.userForm.show(row, "update");
+			this.$refs.form.show(row, "update");
 		},
 		handleDelete(rows) {
 			const _this = this;
@@ -150,7 +150,7 @@ export default {
 						let ids = rows.map(item => {
 							return item.id;
 						});
-						await UserApi.RemoveAll(ids);
+						await API.RemoveAll(ids);
 						_this.handleSearch();
 					}
 				});

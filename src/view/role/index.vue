@@ -1,43 +1,62 @@
 <template>
-	<layout-list
-		ref="list"
-		hasForm
-		:query.sync="query"
-		:list.sync="list"
-		:listLoading.sync="listLoading"
-		:cols="cols"
-		:total="totalElements"
-		:showForm="true"
-		:showView="true"
-		:showExport="false"
-		:showImport="false"
-		@search="handleSearch"
-		@create="handleCreate"
-		@delete="handleDelete"
-		@update="handleUpdate"
-		@view="handleView"
-	>
-		<template slot="search">
-			<Input v-model="query.name" placeholder="请输入角色名" clearable style="width: 200px"/>
-			<Input v-model="query.code" placeholder="请输入角色代码" clearable style="width: 200px"/>
-		</template>
-		<template slot-scope="{ row, index }" slot="action">
-			<Button type="info" size="small" @click="handleDispatch(row,index)">分配用户</Button>
-			<dispatch ref="dispatch"/>
-		</template>
-		<form-modal ref="form" slot="form" @save="handleSearch"></form-modal>
-		<view-modal ref="view" slot="view"></view-modal>
-	</layout-list>
+	<Layout class="full-container list-layout">
+		<Layout>
+			<Header class="list-header">
+				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
+				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
+				<Divider/>
+				<Input v-model="query.name" placeholder="请输入角色名" clearable style="width: 200px"/>
+				<Input v-model="query.code" placeholder="请输入角色代码" clearable style="width: 200px"/>
+				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
+				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
+			</Header>
+			<Content class="list-content">
+				<Table
+					ref="table"
+					border
+					:columns="cols"
+					:data="list"
+					:loading="listLoading"
+					highlight-row
+					@on-row-dblclick="handleView"
+					@on-current-change="handleRowChange"
+					@on-selection-change="handleSelectedChange"
+				>
+					<template slot-scope="{ row, index }" slot="action">
+						<ButtonGroup>
+							<Button type="info" size="small" @click="handleDispatch(row,index)">分配用户</Button>
+							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
+							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
+						</ButtonGroup>
+						<dispatch ref="dispatch"/>
+					</template>
+				</Table>
+			</Content>
+			<Footer class="list-footer">
+				<Page
+					:total="totalElemens"
+					:current.sync="query.page"
+					:page-size="query.limit"
+					show-sizer
+					show-elevator
+					show-total
+					transfer
+					@on-change="handlePageChange"
+					@on-page-size-change="handleLimitChange"
+				></Page>
+			</Footer>
+		</Layout>
+		<FormModal ref="form" @save="handleSearch"></FormModal>
+		<ViewModal ref="view"></ViewModal>
+	</Layout>
 </template>
 <script>
-import RoleApi from "@/api/role";
-import LayoutList from "@/components/LayoutList";
 import FormModal from "./form";
 import ViewModal from "./view";
 import Dispatch from "./dispatch";
+import API from "@/api/role";
 export default {
 	components: {
-		LayoutList,
 		FormModal,
 		ViewModal,
 		Dispatch
@@ -48,7 +67,7 @@ export default {
 				page: 1,
 				limit: 10
 			},
-			totalElements: 100,
+			totalElemens: 20,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],
@@ -86,10 +105,13 @@ export default {
 			list: []
 		};
 	},
+	created() {
+		this.handleSearch();
+	},
 	methods: {
 		async handleSearch() {
 			const _this = this;
-			let res = await RoleApi.Page(this.query);
+			let res = await API.Page(this.query);
 			this.list = res.content;
 			this.totalElements = res.totalElements;
 			this.listLoading = false;
@@ -106,12 +128,41 @@ export default {
 		handleDispatch(row, index) {
 			this.$refs.dispatch.show(row);
 		},
-		async handleDelete(rows) {
-			let ids = [];
-			rows.forEach(item => {
-				ids.push(item.id);
-			});
-			await RoleApi.RemoveAll(ids);
+		handleDelete(rows) {
+			const _this = this;
+			rows = rows || this.selectedRows;
+			if (rows.length === 0) {
+				this.$Modal.error({
+					title: "操作有误",
+					content: "请先选择要删除的数据",
+					closable: true
+				});
+			} else {
+				this.$Modal.confirm({
+					title: "操作提示",
+					content: `确定要删除这${rows.length}条数据吗？`,
+					closable: true,
+					onOk: async () => {
+						let ids = rows.map(item => {
+							return item.id;
+						});
+						await API.RemoveAll(ids);
+						_this.handleSearch();
+					}
+				});
+			}
+		},
+		handlePageChange(index) {
+			this.query.page = index;
+		},
+		handleLimitChange(size) {
+			this.query.limit = size;
+		},
+		handleRowChange(currentRow, lastRow) {
+			this.currentRow = currentRow;
+		},
+		handleSelectedChange(selected) {
+			this.selectedRows = selected;
 		}
 	}
 };
@@ -120,7 +171,7 @@ export default {
 .list-layout {
 	background: white;
 	.ivu-layout {
-		padding: 0 10px;
+		padding: 10px;
 		background: white;
 		height: 100%;
 		display: flex;
@@ -130,8 +181,8 @@ export default {
 }
 * {
 	/deep/ .list-header {
+		border: 1px #e8eaec solid;
 		background: #f8f8f9;
-		margin: 10px 0;
 		height: 16%;
 		padding: 0 10px;
 		/deep/ .ivu-divider {
@@ -139,16 +190,19 @@ export default {
 		}
 	}
 	/deep/ .list-sider {
+		margin: 10px 0 10px 10px;
+		padding: 10px;
+		border: 1px #e8eaec solid;
 		background: #f8f8f9;
-		margin: 10px;
 	}
 	/deep/ .list-content {
 		height: 80%;
+		margin-top: 10px;
 		overflow: auto;
 	}
 	/deep/ .list-footer {
-		background: #f8f8f9;
-		margin: 10px 0;
+		border: 1px #e8eaec solid;
+		margin-top: 10px;
 		padding: 20px;
 	}
 	/deep/ .ivu-table-wrapper {

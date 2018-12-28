@@ -1,41 +1,60 @@
 <template>
-	<layout-list
-		ref="list"
-		hasForm
-		:query.sync="query"
-		:list.sync="list"
-		:listLoading.sync="listLoading"
-		:cols="cols"
-		:showExport="false"
-		:showImport="false"
-		:showLeft="true"
-		:showForm="true"
-		:showView="true"
-		:showPage="false"
-		@search="handleSearch"
-		@create="handleCreate"
-		@delete="handleDelete"
-		@update="handleUpdate"
-		@view="handleView"
-	>
-		<FormModal ref="form" slot="form" @save="handleSearch"></FormModal>
-		<ViewModal ref="view" slot="view"></ViewModal>
-		<template slot="search">
-			<Input v-model="query.name" placeholder="请输入菜单名" clearable style="width: 200px"/>
-		</template>
-		<template slot="left">
+	<Layout class="full-container list-layout">
+		<Sider class="list-sider">
 			<Tree :data="menus" @on-select-change="handleTreeNodeClick"></Tree>
-		</template>
-		<template slot-scope="{ row, index }" slot="action">
-			<Button type="info" size="small" @click="handleChildren(row,index)">添加下级菜单</Button>
-		</template>
-	</layout-list>
+		</Sider>
+		<Layout>
+			<Header class="list-header">
+				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
+				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
+				<Divider/>
+				<Input v-model="query.name" placeholder="请输入菜单名" clearable style="width: 200px"/>
+				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
+				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
+			</Header>
+			<Content class="list-content">
+				<Table
+					ref="table"
+					border
+					:columns="cols"
+					:data="list"
+					:loading="listLoading"
+					highlight-row
+					@on-row-dblclick="handleView"
+					@on-current-change="handleRowChange"
+					@on-selection-change="handleSelectedChange"
+				>
+					<template slot-scope="{ row, index }" slot="action">
+						<ButtonGroup>
+							<Button type="info" size="small" @click="handleChildren(row,index)">添加下级菜单</Button>
+							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
+							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
+						</ButtonGroup>
+					</template>
+				</Table>
+			</Content>
+			<Footer class="list-footer">
+				<Page
+					:total="totalElemens"
+					:current.sync="query.page"
+					:page-size="query.limit"
+					show-sizer
+					show-elevator
+					show-total
+					transfer
+					@on-change="handlePageChange"
+					@on-page-size-change="handleLimitChange"
+				></Page>
+			</Footer>
+		</Layout>
+		<FormModal ref="form" @save="handleSearch"></FormModal>
+		<ViewModal ref="view"></ViewModal>
+	</Layout>
 </template>
 <script>
-import MenuApi from "@/api/menu";
-import LayoutList from "@/components/LayoutList";
 import FormModal from "./form";
 import ViewModal from "./view";
+import API from "@/api/menu";
 function fmt(date) {
 	if (date instanceof Date) {
 		return `${date.getFullYear()}年${date.getMonth() +
@@ -44,15 +63,19 @@ function fmt(date) {
 }
 export default {
 	components: {
-		LayoutList,
 		FormModal,
 		ViewModal
 	},
 	data() {
 		return {
-			listLoading: false,
-			query: { page: 1, limit: 10, name: "" },
-			list: [],
+			query: {
+				page: 1,
+				limit: 10
+			},
+			totalElemens: 20,
+			listLoading: true,
+			currentRow: null,
+			selectedRows: [],
 			cols: [
 				{ type: "selection", width: 60, align: "center" },
 				{ type: "index", title: "序号", width: 80, align: "center" },
@@ -75,48 +98,8 @@ export default {
 					width: 250
 				}
 			],
-			menus: [
-				{
-					title: "系统设置",
-					expand: true,
-					code: "systemSetting",
-					router: "/sys",
-					children: [
-						{
-							title: "菜单管理",
-							expand: true,
-							code: "menuManager",
-							router: "/sys/menu"
-						},
-						{
-							title: "用户管理",
-							expand: true,
-							code: "userManager",
-							router: "/sys/user"
-						}
-					]
-				},
-				{
-					title: "个人中心",
-					expand: true,
-					code: "owner",
-					router: "/owner",
-					children: [
-						{
-							title: "个人资料",
-							expand: true,
-							code: "userInfo",
-							router: "/owner/userinfo"
-						},
-						{
-							title: "通讯录",
-							expand: true,
-							code: "concact",
-							router: "/owner/concact"
-						}
-					]
-				}
-			]
+			menus: [],
+			list: []
 		};
 	},
 	created() {
@@ -125,7 +108,7 @@ export default {
 	methods: {
 		async handleSearch() {
 			const _this = this;
-			this.menus = await MenuApi.Tree();
+			this.menus = await API.Tree();
 			this.list = this.handleTreeToArray(this.menus);
 			this.handleFilter();
 			_this.listLoading = false;
@@ -144,18 +127,35 @@ export default {
 		handleView(row, index) {
 			this.$refs.view.show(row);
 		},
-		async handleDelete(rows) {
-			let ids = [];
-			rows.forEach(item => {
-				ids.push(item.id);
-			});
-			await MenuApi.RemoveAll(ids);
+		handleUpdate(row, index) {
+			this.$refs.form.show(row, "update");
 		},
 		handleChildren(row, index) {
 			this.$refs.form.show({ parent: row }, "create");
 		},
-		handleUpdate(row, index) {
-			this.$refs.form.show(row, "update");
+		handleDelete(rows) {
+			const _this = this;
+			rows = rows || this.selectedRows;
+			if (rows.length === 0) {
+				this.$Modal.error({
+					title: "操作有误",
+					content: "请先选择要删除的数据",
+					closable: true
+				});
+			} else {
+				this.$Modal.confirm({
+					title: "操作提示",
+					content: `确定要删除这${rows.length}条数据吗？`,
+					closable: true,
+					onOk: async () => {
+						let ids = rows.map(item => {
+							return item.id;
+						});
+						await API.RemoveAll(ids);
+						_this.handleSearch();
+					}
+				});
+			}
 		},
 		handleTreeNodeClick(arr, node) {
 			if (arr.length === 0) {
@@ -176,8 +176,75 @@ export default {
 				}
 			})({}, arr, res);
 			return res;
+		},
+		handlePageChange(index) {
+			this.query.page = index;
+		},
+		handleLimitChange(size) {
+			this.query.limit = size;
+		},
+		handleRowChange(currentRow, lastRow) {
+			this.currentRow = currentRow;
+		},
+		handleSelectedChange(selected) {
+			this.selectedRows = selected;
 		}
 	}
 };
 </script>
-
+<style lang="scss" scoped>
+.list-layout {
+	background: white;
+	.ivu-layout {
+		padding: 10px;
+		background: white;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+}
+* {
+	/deep/ .list-header {
+		border: 1px #e8eaec solid;
+		background: #f8f8f9;
+		height: 16%;
+		padding: 0 10px;
+		/deep/ .ivu-divider {
+			margin: 0;
+		}
+	}
+	/deep/ .list-sider {
+		margin: 10px 0 10px 10px;
+		padding: 10px;
+		border: 1px #e8eaec solid;
+		background: #f8f8f9;
+	}
+	/deep/ .list-content {
+		height: 80%;
+		margin-top: 10px;
+		overflow: auto;
+	}
+	/deep/ .list-footer {
+		border: 1px #e8eaec solid;
+		margin-top: 10px;
+		padding: 20px;
+	}
+	/deep/ .ivu-table-wrapper {
+		height: 100%;
+		/deep/ .ivu-table {
+			.ivu-table-header {
+				height: 40px;
+			}
+			.ivu-table-body {
+				height: calc(100% - 40px);
+				overflow-y: auto;
+				overflow-x: hidden;
+			}
+			.ivu-table-footer {
+				height: 0px;
+			}
+		}
+	}
+}
+</style>
