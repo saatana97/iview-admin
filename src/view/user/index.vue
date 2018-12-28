@@ -1,57 +1,65 @@
 <template>
-	<layout-list
-		ref="list"
-		hasForm
-		:query.sync="query"
-		:list.sync="list"
-		:listLoading.sync="listLoading"
-		:cols="cols"
-		:total="totalElements"
-		:showForm="true"
-		:showView="true"
-		:showLeft="true"
-		@search="handleSearch"
-		@create="handleCreate"
-		@delete="handleDelete"
-		@update="handleUpdate"
-		@export="handleExport"
-		@import="handleImport"
-		@view="handleView"
-	>
-		<template slot="left">
+	<Layout class="full-container list-layout">
+		<Sider class="list-sider">
 			<Tree :data="leftTree" @on-select-change="handleTreeNodeClick"></Tree>
-		</template>
-		<template slot="search">
-			<Input v-model="query.username" placeholder="请输入用户名" clearable style="width: 200px"/>
-			<Select
-				style="width:200px;"
-				v-model="query.type"
-				filterable
-				remote
-				clearable
-				transfer
-				:remote-method="handleSearchTypeLoad"
-				:loading="searchTypeLoading"
-			>
-				<Option
-					v-for="(option, index) in selectOptions.type"
-					:value="option.value"
-					:key="index"
-				>{{option.label}}</Option>
-			</Select>
-			<DatePicker type="daterange" placement="bottom-end" placeholder="请选择日期范围" style="width: 200px"></DatePicker>
-		</template>
-		<user-form ref="form" slot="form"></user-form>
-		<user-view ref="view" slot="view"></user-view>
-	</layout-list>
+		</Sider>
+		<Layout>
+			<Header class="list-header">
+				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
+				<!-- <Button icon="md-attach" type="info" @click="handleImport">导入</Button>
+				<Button icon="md-download" type="success" @click="handleExport">导出</Button>-->
+				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
+				<Divider/>
+				<Input v-model="query.name" placeholder="请输入姓名" clearable style="width: 200px"/>
+				<Input v-model="query.authorizer.username" placeholder="请输入用户名" clearable style="width: 200px"/>
+				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
+				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
+			</Header>
+			<Content class="list-content">
+				<Table
+					ref="table"
+					border
+					:columns="cols"
+					:data="list"
+					:loading="listLoading"
+					highlight-row
+					@on-row-dblclick="handleView"
+					@on-current-change="handleRowChange"
+					@on-selection-change="handleSelectedChange"
+				>
+					<template slot-scope="{ row, index }" slot="username">{{row.authorizer.username}}</template>
+					<template slot-scope="{ row, index }" slot="action">
+						<ButtonGroup>
+							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
+							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
+						</ButtonGroup>
+					</template>
+				</Table>
+			</Content>
+			<Footer class="list-footer">
+				<Page
+					:total="totalElemens"
+					:current.sync="query.page"
+					:page-size="query.limit"
+					show-sizer
+					show-elevator
+					show-total
+					transfer
+					@on-change="handlePageChange"
+					@on-page-size-change="handleLimitChange"
+				></Page>
+			</Footer>
+		</Layout>
+		<User-Form ref="userForm" @save="handleSearch"></User-Form>
+		<User-View ref="userView"></User-View>
+	</Layout>
 </template>
 <script>
-import LayoutList from "@/components/LayoutList";
 import UserForm from "./form";
 import UserView from "./view";
+import UserApi from "@/api/user";
 export default {
 	components: {
-		LayoutList,
 		UserForm,
 		UserView
 	},
@@ -59,11 +67,10 @@ export default {
 		return {
 			query: {
 				page: 1,
-				limit: 10
+				limie: 10,
+				authorizer: {}
 			},
-			selectOptions: { type: [] },
-			searchTypeLoading: false,
-			totalElements: 100,
+			totalElemens: 20,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],
@@ -84,8 +91,8 @@ export default {
 					key: "name"
 				},
 				{
-					title: "年龄",
-					key: "age"
+					title: "用户名",
+					slot: "username"
 				},
 				{
 					title: "地址",
@@ -98,107 +105,24 @@ export default {
 					align: "center"
 				}
 			],
-			list: [
-				{
-					name: "admin",
-					age: 21,
-					address: "地球"
-				},
-				{
-					name: "test1",
-					age: 21,
-					address: "地球"
-				},
-				{
-					name: "test2",
-					age: 21,
-					address: "地球"
-				},
-				{
-					name: "test3",
-					age: 21,
-					address: "地球"
-				},
-				{
-					name: "test4",
-					age: 21,
-					address: "地球"
-				},
-				{
-					name: "test5",
-					age: 21,
-					address: "地球"
-				}
-			],
-			leftTree: [
-				{
-					title: "parent 1",
-					expand: true,
-					children: [
-						{
-							title: "parent 1-1",
-							expand: true,
-							children: [
-								{
-									title: "leaf 1-1-1"
-								},
-								{
-									title: "leaf 1-1-2"
-								}
-							]
-						},
-						{
-							title: "parent 1-2",
-							expand: true,
-							children: [
-								{
-									title: "leaf 1-2-1"
-								},
-								{
-									title: "leaf 1-2-1"
-								}
-							]
-						}
-					]
-				}
-			]
+			list: [],
+			leftTree: []
 		};
 	},
-	mounted() {
-		const _this = this;
-		setTimeout(function() {
-			_this.listLoading = false;
-		}, 1000);
+	created() {
+		this.handleSearch();
 	},
 	methods: {
-		handleSearch() {
+		async handleSearch() {
 			const _this = this;
 			this.listLoading = true;
-			setTimeout(function() {
-				_this.list = [];
-				for (let i = 0; i < _this.query.limit; i++) {
-					if (
-						_this.list.length ===
-						_this.totalElements -
-							(_this.query.page - 1) * _this.query.limit
-					) {
-						break;
-					}
-					_this.list.push({
-						name:
-							"test" +
-							(i +
-								1 +
-								(_this.query.page - 1) * _this.query.limit),
-						age: 21,
-						address: "地球"
-					});
-				}
-				_this.listLoading = false;
-			}, 1000);
+			let res = await UserApi.Page(this.query);
+			this.list = res.content;
+			this.totalElemens = res.totalElemens;
+			this.listLoading = false;
 		},
 		handleCreate() {
-			this.$refs.form.show();
+			this.$refs.userForm.show();
 		},
 		handleExport() {},
 		handleImport() {},
@@ -206,85 +130,45 @@ export default {
 			this.$refs.userView.show(row);
 		},
 		handleUpdate(row, index) {
-			this.$refs.form.show(row, "update");
+			this.$refs.userForm.show(row, "update");
 		},
 		handleDelete(rows) {
-			alert("delete " + rows.length);
-		},
-		handleTreeNodeClick(selected, currentNode) {},
-		handleSearchTypeLoad(query) {
-			if (query !== "") {
-				this.searchTypeLoading = true;
-				setTimeout(() => {
-					this.searchTypeLoading = false;
-					const list = [
-						"Alabama",
-						"Alaska",
-						"Arizona",
-						"Arkansas",
-						"California",
-						"Colorado",
-						"Connecticut",
-						"Delaware",
-						"Florida",
-						"Georgia",
-						"Hawaii",
-						"Idaho",
-						"Illinois",
-						"Indiana",
-						"Iowa",
-						"Kansas",
-						"Kentucky",
-						"Louisiana",
-						"Maine",
-						"Maryland",
-						"Massachusetts",
-						"Michigan",
-						"Minnesota",
-						"Mississippi",
-						"Missouri",
-						"Montana",
-						"Nebraska",
-						"Nevada",
-						"New hampshire",
-						"New jersey",
-						"New mexico",
-						"New york",
-						"North carolina",
-						"North dakota",
-						"Ohio",
-						"Oklahoma",
-						"Oregon",
-						"Pennsylvania",
-						"Rhode island",
-						"South carolina",
-						"South dakota",
-						"Tennessee",
-						"Texas",
-						"Utah",
-						"Vermont",
-						"Virginia",
-						"Washington",
-						"West virginia",
-						"Wisconsin",
-						"Wyoming"
-					].map(item => {
-						return {
-							value: item,
-							label: item
-						};
-					});
-					this.selectOptions.type = list.filter(
-						item =>
-							item.label
-								.toLowerCase()
-								.indexOf(query.toLowerCase()) > -1
-					);
-				}, 200);
+			const _this = this;
+			rows = rows || this.selectedRows;
+			if (rows.length === 0) {
+				this.$Modal.error({
+					title: "操作有误",
+					content: "请先选择要删除的数据",
+					closable: true
+				});
 			} else {
-				this.selectOptions.type = [];
+				this.$Modal.confirm({
+					title: "操作提示",
+					content: `确定要删除这${rows.length}条数据吗？`,
+					closable: true,
+					onOk: async () => {
+						let ids = rows.map(item => {
+							return item.id;
+						});
+						await UserApi.RemoveAll(ids);
+						_this.handleSearch();
+					}
+				});
 			}
-		}
+		},
+		handlePageChange(index) {
+			this.query.page = index;
+		},
+		handleLimitChange(size) {
+			this.query.limit = size;
+		},
+		handleRowChange(currentRow, lastRow) {
+			this.currentRow = currentRow;
+		},
+		handleSelectedChange(selected) {
+			this.selectedRows = selected;
+		},
+		handleTreeNodeClick(selected, currentNode) {}
 	}
 };
 </script>
@@ -292,7 +176,7 @@ export default {
 .list-layout {
 	background: white;
 	.ivu-layout {
-		padding: 0 10px;
+		padding: 10px;
 		background: white;
 		height: 100%;
 		display: flex;
@@ -302,8 +186,8 @@ export default {
 }
 * {
 	/deep/ .list-header {
+		border: 1px #e8eaec solid;
 		background: #f8f8f9;
-		margin: 10px 0;
 		height: 16%;
 		padding: 0 10px;
 		/deep/ .ivu-divider {
@@ -311,16 +195,19 @@ export default {
 		}
 	}
 	/deep/ .list-sider {
+		margin: 10px 0 10px 10px;
+		padding: 10px;
+		border: 1px #e8eaec solid;
 		background: #f8f8f9;
-		margin: 10px;
 	}
 	/deep/ .list-content {
 		height: 80%;
+		margin-top: 10px;
 		overflow: auto;
 	}
 	/deep/ .list-footer {
-		background: #f8f8f9;
-		margin: 10px 0;
+		border: 1px #e8eaec solid;
+		margin-top: 10px;
 		padding: 20px;
 	}
 	/deep/ .ivu-table-wrapper {
