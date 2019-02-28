@@ -37,7 +37,7 @@ export async function Request(url, data, method) {
   }
   res = res.data || {};
   if (res.status && res.status !== 200) {
-    app.$Message.error(res.data || res.message);
+    app.$Message.error(res.message || '发生未知错误,请联系管理员');
     if (res.status === 401) {
       sessionStorage.clear();
       localStorage.clear();
