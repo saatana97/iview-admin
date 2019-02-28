@@ -91,14 +91,17 @@ export default {
 				if (valid) {
 					this.loading = true;
 					let res = await AuthApi.Login(this.form);
-					let storage = sessionStorage;
-					if (this.form.remeber) {
-						storage = localStorage;
+					if (res) {
+						let storage = sessionStorage;
+						if (this.form.remeber) {
+							storage = localStorage;
+						}
+						storage.token = res.token;
+						let returnRouter =
+							sessionStorage.returnRouter || "/home";
+						this.$router.push(returnRouter);
+						this.$Message.success("登陆成功");
 					}
-					storage.token = res.token;
-					let returnRouter = sessionStorage.returnRouter || "/home";
-					this.$router.push(returnRouter);
-					this.$Message.success("登陆成功");
 					this.loading = false;
 				} else {
 					this.$Message.error("登录失败");

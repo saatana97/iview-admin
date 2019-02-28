@@ -29,6 +29,11 @@ const router = new Router({
           component: Home
         },
         {
+          path: '/sys/dict',
+          name: 'Dict',
+          component: User
+        },
+        {
           path: '/sys/user',
           name: 'User',
           component: User

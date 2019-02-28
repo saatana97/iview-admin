@@ -2,7 +2,7 @@ const axios = require('axios');
 const service = axios.create({
   // baseURL: 'http://saatana.cn/shop-api/',
   baseURL: 'http://localhost:8080/api/',
-  timeout: 5000
+  timeout: 10000
 });
 function getToken() {
   return localStorage.token || sessionStorage.token || '';
@@ -19,10 +19,18 @@ service.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+export async function Get(url, data) {
+  return Request(url, data, 'get');
+}
 export async function Post(url, data) {
+  return Request(url, data);
+}
+export async function Request(url, data, method) {
+  method = (method || 'post').toUpperCase();
   let res = {};
+  let body = method === 'POST' ? { url, data, method } : { url, params: data, method };
   try {
-    res = await service({ url, data, method: 'post' });
+    res = await service(body);
   } catch (e) {
     console.warn(e);
     app.$Message.error('网络连接异常');
