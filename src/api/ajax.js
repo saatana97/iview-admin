@@ -1,4 +1,5 @@
 const axios = require('axios');
+let source = axios.CancelToken.source();
 const service = axios.create({
   // baseURL: 'http://saatana.cn/shop-api/',
   baseURL: 'http://localhost:8080/api/',
@@ -11,6 +12,7 @@ service.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8'
 service.interceptors.request.use(
   config => {
     config.headers.token = getToken();
+    config.cancelToken = source.token;
     console.info('request info: ', config.baseURL + config.url, config.data);
     return config;
   },
@@ -32,13 +34,21 @@ export async function Request(url, data, method) {
   try {
     res = await service(body);
   } catch (e) {
-    console.warn(e);
-    app.$Message.error('网络连接异常');
+    if (axios.isCancel(e)) {
+      console.log('请求已取消：' + service.defaults.baseURL + url);
+    } else {
+      console.warn(e);
+      app.$Message.error('网络连接异常');
+      source.cancel();
+      source = axios.CancelToken.source();
+    }
   }
   res = res.data || {};
   if (res.status && res.status !== 200) {
     app.$Message.error(res.message || '发生未知错误,请联系管理员');
     if (res.status === 401) {
+      source.cancel();
+      source = axios.CancelToken.source();
       sessionStorage.clear();
       localStorage.clear();
       app.$router.push('/login');
