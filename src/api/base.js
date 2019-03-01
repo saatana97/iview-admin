@@ -7,6 +7,9 @@ export default controller => {
     All() {
       return Post(controller + '/all');
     },
+    Check(data) {
+      return Post(controller + '/check', data);
+    },
     List(data) {
       return Post(controller + '/list', data);
     },

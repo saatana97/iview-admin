@@ -80,7 +80,7 @@ export default {
 							if (_this.oldUsername === value) {
 								cb();
 							} else {
-								let res = await AuthApi.List({
+								let res = await AuthApi.Check({
 									username: value
 								});
 								if (res.length === 0) {

@@ -52,7 +52,7 @@ export default {
 			visiable: false,
 			loading: false,
 			type: "create",
-			form: {},
+			form: { sort: 0 },
 			_form: "",
 			rules: {
 				type: [
@@ -124,9 +124,9 @@ export default {
 		};
 	},
 	methods: {
-		show(row, type) {
+		async show(row, type) {
 			this.visiable = true;
-			this.form = row ? JSON.parse(JSON.stringify(row)) : {};
+			this.form = row ? JSON.parse(JSON.stringify(row)) : this.form;
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 		},
@@ -165,6 +165,16 @@ export default {
 					}
 				});
 			}
+		}
+	},
+	watch: {
+		async "form.type"(value, old) {
+			let res = await API.Check({ type: value });
+			let sort = 0;
+			if (res.length > 0) {
+				sort = (res.length + 1) * 10;
+			}
+			this.form.sort = sort;
 		}
 	}
 };

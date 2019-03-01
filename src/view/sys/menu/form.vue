@@ -96,9 +96,7 @@ export default {
 	methods: {
 		show(row, type) {
 			this.visiable = true;
-			this.form = row
-				? JSON.parse(JSON.stringify(row))
-				: { parent: { title: "" } };
+			this.form = row ? JSON.parse(JSON.stringify(row)) : this.form;
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 		},
