@@ -33,19 +33,6 @@
 					</template>
 				</Table>
 			</Content>
-			<Footer class="list-footer">
-				<Page
-					:total="totalElemens"
-					:current.sync="query.page"
-					:page-size="query.limit"
-					show-sizer
-					show-elevator
-					show-total
-					transfer
-					@on-change="handlePageChange"
-					@on-page-size-change="handleLimitChange"
-				></Page>
-			</Footer>
 		</Layout>
 		<FormModal ref="form" @save="handleSearch"></FormModal>
 		<ViewModal ref="view"></ViewModal>
@@ -66,7 +53,6 @@ export default {
 				page: 1,
 				limit: 10
 			},
-			totalElemens: 0,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],

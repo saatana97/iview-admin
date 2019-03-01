@@ -8,7 +8,7 @@
 				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
 				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
 				<Divider/>
-				<Input v-model="query.name" placeholder="请输入组织机构名称" clearable style="width: 200px"/>
+				<Input v-model="query.title" placeholder="请输入组织机构名称" clearable style="width: 200px"/>
 				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
 				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleReset">重置</Button>
 			</Header>
@@ -24,31 +24,20 @@
 					@on-current-change="handleRowChange"
 					@on-selection-change="handleSelectedChange"
 				>
-					<template slot-scope="{ row, index }" slot="type">
-						<span>{{handleTypeLabel(row.type)}}</span>
-					</template>
 					<template slot-scope="{ row, index }" slot="action">
 						<ButtonGroup>
-							<Button type="info" size="small" @click="handleChildren(row,index)">添加下级组织机构</Button>
+							<Button
+								type="info"
+								size="small"
+								@click="handleChildren(row,index)"
+								v-if="!isLastLevel(row.level)"
+							>添加下级组织机构</Button>
 							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
 							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
 						</ButtonGroup>
 					</template>
 				</Table>
 			</Content>
-			<Footer class="list-footer">
-				<Page
-					:total="totalElemens"
-					:current.sync="query.page"
-					:page-size="query.limit"
-					show-sizer
-					show-elevator
-					show-total
-					transfer
-					@on-change="handlePageChange"
-					@on-page-size-change="handleLimitChange"
-				></Page>
-			</Footer>
 		</Layout>
 		<FormModal ref="form" @save="handleSearch"></FormModal>
 		<ViewModal ref="view"></ViewModal>
@@ -65,12 +54,12 @@ export default {
 		ViewModal
 	},
 	data() {
+		const _this = this;
 		return {
 			query: {
 				page: 1,
 				limit: 10
 			},
-			totalElemens: 0,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],
@@ -79,7 +68,7 @@ export default {
 				{ type: "index", title: "序号", width: 80, align: "center" },
 				{
 					title: "名称",
-					key: "name",
+					key: "title",
 					align: "center"
 				},
 				{
@@ -89,7 +78,12 @@ export default {
 				},
 				{
 					title: "类型",
-					slot: "type",
+					key: "typeLabel",
+					align: "center"
+				},
+				{
+					title: "级别",
+					key: "levelLabel",
 					align: "center"
 				},
 				{
@@ -99,32 +93,51 @@ export default {
 					width: 300
 				}
 			],
-			menus: [],
-			list: []
+			orgs: [],
+			list: [],
+			levels: []
 		};
 	},
-	created() {
+	async created() {
 		this.handleSearch();
+		let res = await DictAPI.Check({ code: "orgLevel" });
+		this.levels = res.map(item => {
+			return item.value;
+		});
 	},
 	methods: {
 		async handleTypeLabel(value) {
-			return await DictAPI.Query({ code: "orgType", value });
+			let res = await DictAPI.Query({ code: "orgType", value });
+			return res;
+		},
+		async handleLevelLabel(value) {
+			let res = await DictAPI.Query({ code: "orgLevel", value });
+			return res;
 		},
 		async handleSearch() {
 			const _this = this;
-			this.menus = await API.Tree();
-			this.list = this.handleTreeToArray(this.menus);
-			this.totalElemens = res.totalElements;
+			this.orgs = await API.Tree();
+			this.list = this.handleTreeToArray(this.orgs);
 			this.handleFilter();
 			_this.listLoading = false;
 		},
+		isLastLevel(level) {
+			return this.levels.indexOf(level) === this.levels.length - 1;
+		},
 		handleFilter() {
 			const _this = this;
-			if (this.query.name) {
+			if (this.query.title) {
 				this.list = this.list.filter(item => {
-					return new RegExp(_this.query.name).test(item.name);
+					return new RegExp(_this.query.title).test(item.title);
 				});
 			}
+		},
+		handleReset() {
+			this.query = {
+				page: 1,
+				limit: 10
+			};
+			this.handleSearch();
 		},
 		handleCreate() {
 			this.$refs.form.show();
@@ -164,7 +177,7 @@ export default {
 		},
 		handleTreeNodeClick(arr, node) {
 			if (arr.length === 0) {
-				arr = this.menus;
+				arr = this.orgs;
 			}
 			this.list = this.handleTreeToArray(arr);
 			this.handleFilter();

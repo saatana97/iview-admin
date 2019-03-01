@@ -35,7 +35,7 @@
 				<Input v-model="form.label" clearable placeholder="请输入字典标签"></Input>
 			</FormItem>
 			<FormItem label="值" prop="value">
-				<Input v-model="form.value" clearable placeholder="请输入字典值"></Input>
+				<InputNumber v-model="form.value" :max="999" :min="0" style="width:100%;"></InputNumber>
 			</FormItem>
 			<FormItem label="排序" prop="sort">
 				<InputNumber v-model="form.sort" :max="999" :min="0" style="width:100%;"></InputNumber>
@@ -68,7 +68,7 @@ export default {
 			type: "create",
 			types: [],
 			codes: [],
-			form: { sort: 0 },
+			form: { value: 0, sort: 0 },
 			_form: "",
 			rules: {
 				code: [
@@ -196,13 +196,13 @@ export default {
 		}
 	},
 	watch: {
-		async "form.type"(value, old) {
-			let res = await API.Check({ type: value });
-			let sort = 0;
-			if (res.length > 0) {
-				sort = (res.length + 1) * 10;
+		async "form.code"(value, old) {
+			if (this.type === "create") {
+				let res = await API.Check({ code: value });
+				let count = res.length;
+				this.form.sort = (count + 1) * 10;
+				this.form.value = count + 1;
 			}
-			this.form.sort = sort;
 		}
 	}
 };
