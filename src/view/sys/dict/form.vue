@@ -119,13 +119,6 @@ export default {
 						},
 						trigger: "change"
 					}
-				],
-				sort: [
-					{
-						required: true,
-						message: "排序不能为空",
-						trigger: "change"
-					}
 				]
 			}
 		};
@@ -133,10 +126,7 @@ export default {
 	methods: {
 		show(row, type) {
 			this.visiable = true;
-			this.form = row
-				? JSON.parse(JSON.stringify(row))
-				: { authorizer: {} };
-			this.oldUsername = this.form.authorizer.username;
+			this.form = row ? JSON.parse(JSON.stringify(row)) : {};
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 		},

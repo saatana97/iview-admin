@@ -8,7 +8,7 @@
 				<Input v-model="query.name" placeholder="请输入角色名" clearable style="width: 200px"/>
 				<Input v-model="query.code" placeholder="请输入角色代码" clearable style="width: 200px"/>
 				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
-				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
+				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleReset">重置</Button>
 			</Header>
 			<Content class="list-content">
 				<Table
@@ -115,6 +115,10 @@ export default {
 			this.list = res.content;
 			this.totalElements = res.totalElements;
 			this.listLoading = false;
+		},
+		handleReset() {
+			this.query = { page: 1, limit: 10 };
+			this.handleSearch();
 		},
 		handleCreate() {
 			this.$refs.form.show();

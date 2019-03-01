@@ -183,8 +183,12 @@ export default {
 			});
 			this.activeMenu = menu.code;
 			this.$nextTick(() => {
-				this.$refs.leftMenu.updateOpened();
-				this.$refs.leftMenu.updateActiveName();
+				if (this.$refs.leftMenu) {
+					this.$refs.leftMenu.updateOpened();
+					this.$refs.leftMenu.updateActiveName();
+				} else {
+					console.warn("左侧菜单组件找不到引用");
+				}
 			});
 		},
 		handleRouterChange(fullPath) {

@@ -11,7 +11,7 @@
 				<Input v-model="query.label" placeholder="请输入字典标签" clearable style="width: 200px"/>
 				<Input v-model="query.value" placeholder="请输入字典值" clearable style="width: 200px"/>
 				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
-				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
+				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleReset">重置</Button>
 			</Header>
 			<Content class="list-content">
 				<Table
@@ -91,7 +91,7 @@ export default {
 				},
 				{
 					title: "标签",
-					slot: "label"
+					key: "label"
 				},
 				{
 					title: "值",
@@ -122,6 +122,16 @@ export default {
 			this.list = res.content;
 			this.totalElemens = res.totalElemens;
 			this.listLoading = false;
+		},
+		handleReset() {
+			this.query = {
+				page: 1,
+				limit: 10,
+				type: null,
+				label: null,
+				value: null
+			};
+			this.handleSearch();
 		},
 		handleCreate() {
 			this.$refs.form.show();
