@@ -75,6 +75,7 @@ router.beforeEach((to, from, next) => {
       sessionStorage.returnRouter = to.fullPath;
       next('/login');
     } else {
+      sessionStorage.returnRouter = from.fullPath;
       next();
     }
   }
