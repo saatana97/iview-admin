@@ -3,11 +3,13 @@ import Router from 'vue-router';
 import Login from '@/view/login/index';
 import Main from '@/view/main/index';
 import Home from '@/view/home/index';
-import User from '@/view/user/index';
-import Menu from '@/view/menu/index';
-import Role from '@/view/role/index';
-import UserInfo from '@/view/userinfo/index';
-import Concact from '@/view/concact/index';
+import UserInfo from '@/view/owner/userinfo/index';
+import Concact from '@/view/owner/concact/index';
+import User from '@/view/sys/user/index';
+import Menu from '@/view/sys/menu/index';
+import Role from '@/view/sys/role/index';
+import Dict from '@/view/sys/dict/index';
+import Org from '@/view/sys/org/index';
 
 Vue.use(Router);
 const router = new Router({
@@ -31,7 +33,7 @@ const router = new Router({
         {
           path: '/sys/dict',
           name: 'Dict',
-          component: User
+          component: Dict
         },
         {
           path: '/sys/user',
@@ -47,6 +49,11 @@ const router = new Router({
           path: '/sys/role',
           name: 'Role',
           component: Role
+        },
+        {
+          path: '/sys/org',
+          name: 'Org',
+          component: Org
         },
         {
           path: '/owner/userinfo',

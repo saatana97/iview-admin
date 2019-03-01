@@ -7,9 +7,6 @@ const api = {
   },
   Logout() {
     return Post('authorizer/logout');
-  },
-  CheckRepeat(username) {
-    return Post('authorizer/checkRepeat/' + username);
   }
 };
 export default api;

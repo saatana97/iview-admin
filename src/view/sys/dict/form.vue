@@ -8,36 +8,24 @@
 	>
 		<template slot="header" v-if="type === 'create'">
 			<Icon type="md-add-circle"/>
-			<span>添加用户</span>
+			<span>添加字典</span>
 		</template>
 		<template slot="header" v-else>
 			<Icon type="ios-create"/>
-			<span>编辑用户</span>
+			<span>编辑字典</span>
 		</template>
 		<Form :model="form" :rules="rules" :label-width="80" ref="form">
-			<FormItem label="姓名" prop="name">
-				<Input v-model="form.name" clearable placeholder="Enter something..."></Input>
+			<FormItem label="类型" prop="type">
+				<Input v-model="form.type" clearable placeholder="请输入字典类型"></Input>
 			</FormItem>
-			<FormItem label="用户名" prop="authorizer.username">
-				<Input v-model="form.authorizer.username" clearable placeholder="请输入用户名"></Input>
+			<FormItem label="标签" prop="label">
+				<Input v-model="form.label" clearable placeholder="请输入字典标签"></Input>
 			</FormItem>
-			<FormItem label="登录密码" prop="authorizer.password">
-				<Input v-model="form.authorizer.password" clearable placeholder="请输入登录密码" type="password"></Input>
+			<FormItem label="值" prop="value">
+				<Input v-model="form.value" clearable placeholder="请输入字典值"></Input>
 			</FormItem>
-			<FormItem label="确认密码" prop="repwd">
-				<Input v-model="form.repwd" clearable placeholder="请再次确认登录密码" type="password"></Input>
-			</FormItem>
-			<FormItem label="出生日期" prop="birthday">
-				<DatePicker
-					v-model="form.birthday"
-					type="date"
-					placeholder="请选择出生日期"
-					clearable
-					style="width: 200px"
-				></DatePicker>
-			</FormItem>
-			<FormItem label="地址" prop="address">
-				<Input v-model="form.address" clearable placeholder="请输入地址"></Input>
+			<FormItem label="排序" prop="sort">
+				<InputNumber v-model="form.sort" :max="999" :min="0" style="width:100%;"></InputNumber>
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
@@ -56,8 +44,7 @@
 	</Modal>
 </template>
 <script>
-import UserApi from "@/api/user";
-import AuthApi from "@/api/auth";
+import API from "@/api/dict";
 export default {
 	data() {
 		const _this = this;
@@ -65,63 +52,78 @@ export default {
 			visiable: false,
 			loading: false,
 			type: "create",
-			oldUsername: "",
-			form: { authorizer: {} },
+			form: {},
 			_form: "",
 			rules: {
-				"authorizer.username": [
+				type: [
 					{
 						required: true,
-						message: "用户名不能为空",
+						message: "字典类型不能为空",
+						trigger: "change"
+					}
+				],
+				label: [
+					{
+						required: true,
+						message: "字典标签不能为空",
 						trigger: "change"
 					},
 					{
 						async validator(rule, value, cb) {
-							if (_this.oldUsername === value) {
+							let old = JSON.parse(_this._form);
+							if (
+								old.type === _this.form.type &&
+								old.label === value
+							) {
 								cb();
 							} else {
-								let res = await AuthApi.CheckRepeat(value);
-								if (res) {
+								let res = await API.List({
+									type: _this.form.type,
+									label: _this.form.label
+								});
+								if (res.length === 0) {
 									cb();
 								} else {
-									cb(new Error("用户名已存在"));
+									cb(new Error("字典标签已存在"));
 								}
 							}
 						},
-						trigger: "blur"
-					}
-				],
-				"authorizer.password": [
-					{
-						validator(rule, value, cb) {
-							if (
-								value &&
-								(value.length < 6 || value.length > 20)
-							) {
-								cb(new Error("密码长度在6-20位之间"));
-							} else {
-								cb();
-							}
-						},
 						trigger: "change"
 					}
 				],
-				repwd: [
-					{
-						validator(rule, value, cb) {
-							if (value !== _this.form.authorizer.password) {
-								cb(new Error("两次密码输入不一致"));
-							} else {
-								cb();
-							}
-						},
-						trigger: "change"
-					}
-				],
-				name: [
+				value: [
 					{
 						required: true,
-						message: "姓名不能为空",
+						message: "字典值不能为空",
+						trigger: "change"
+					},
+					{
+						async validator(rule, value, cb) {
+							let old = JSON.parse(_this._form);
+							if (
+								old.type === _this.form.type &&
+								old.value === value
+							) {
+								cb();
+							} else {
+								let res = await API.List({
+									type: _this.form.type,
+									value: _this.form.value
+								});
+								if (res.length === 0) {
+									cb();
+								} else {
+									cb(new Error("字典值已存在"));
+								}
+							}
+						},
+						trigger: "change"
+					}
+				],
+				sort: [
+					{
+						required: true,
+						message: "排序不能为空",
 						trigger: "change"
 					}
 				]
@@ -143,7 +145,7 @@ export default {
 			this.$refs.form.validate(async res => {
 				this.loading = true;
 				if (res) {
-					let Save = _this.form.id ? UserApi.Update : UserApi.Create;
+					let Save = _this.form.id ? API.Update : API.Create;
 					await Save(_this.form);
 					this.$emit("save", _this.form);
 					_this.visiable = false;
@@ -177,3 +179,10 @@ export default {
 	}
 };
 </script>
+<style lang="scss" scoped>
+* {
+	/deep/ .ivu-input-number-input-wrap {
+		width: calc(100% - 22px);
+	}
+}
+</style>
