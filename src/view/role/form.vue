@@ -22,11 +22,11 @@
 			<FormItem label="代码" prop="code">
 				<Input v-model="form.code" clearable placeholder="请输入角色代码"></Input>
 			</FormItem>
-			<FormItem label="权限" prop="menus">
+			<FormItem label="可查看菜单" prop="menus">
 				<Transfer
 					:data="menus"
 					:target-keys="targetKeys"
-					:titles="['未分配权限','已拥有权限']"
+					:titles="['未分配菜单','已拥有菜单']"
 					@on-change="handleTransfer"
 				></Transfer>
 			</FormItem>
@@ -135,19 +135,11 @@ export default {
 			});
 		},
 		handleTransfer(targetKeys, direction, moveKeys) {
-			if (direction === "right") {
-				this.targetKeys = moveKeys;
-			} else if (direction === "left") {
-				this.targetKeys = targetKeys;
-			}
+			this.targetKeys = targetKeys;
 			const _this = this;
-			this.form.menus = [];
-			Array.prototype.push.apply(
-				this.form.menus,
-				_this.targetKeys.map(item => {
-					return { id: item };
-				})
-			);
+			this.form.menus = this.targetKeys.map(item => {
+				return { id: item };
+			});
 		},
 		handleVisiableChange(visiable) {
 			if (!visiable) {

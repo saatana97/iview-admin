@@ -89,12 +89,8 @@ export default {
 			this.visiable = false;
 		},
 		handleTransfer(targetKeys, direction, moveKeys) {
-			if (direction === "right") {
-				this.targetKeys = moveKeys;
-			} else if (direction === "left") {
-				this.targetKeys = targetKeys;
-			}
-			this.dispatchs = this.targetKeys;
+			console.log(targetKeys.join(",") || "无");
+			this.dispatchs = this.targetKeys = targetKeys;
 		},
 		handleCancel() {
 			if (this.targetKeys.length === this.olds.length) {
