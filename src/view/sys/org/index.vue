@@ -1,16 +1,16 @@
 <template>
 	<Layout class="full-container list-layout">
 		<Sider class="list-sider">
-			<Tree :data="menus" @on-select-change="handleTreeNodeClick"></Tree>
+			<Tree :data="orgs" @on-select-change="handleTreeNodeClick"></Tree>
 		</Sider>
 		<Layout>
 			<Header class="list-header">
 				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
 				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
 				<Divider/>
-				<Input v-model="query.name" placeholder="请输入菜单名" clearable style="width: 200px"/>
+				<Input v-model="query.name" placeholder="请输入组织机构名称" clearable style="width: 200px"/>
 				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
-				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleSearch">重置</Button>
+				<Button type="info" ghost icon="md-refresh" :loading="listLoading" @click="handleReset">重置</Button>
 			</Header>
 			<Content class="list-content">
 				<Table
@@ -24,9 +24,12 @@
 					@on-current-change="handleRowChange"
 					@on-selection-change="handleSelectedChange"
 				>
+					<template slot-scope="{ row, index }" slot="type">
+						<span>{{handleTypeLabel(row.type)}}</span>
+					</template>
 					<template slot-scope="{ row, index }" slot="action">
 						<ButtonGroup>
-							<Button type="info" size="small" @click="handleChildren(row,index)">添加下级菜单</Button>
+							<Button type="info" size="small" @click="handleChildren(row,index)">添加下级组织机构</Button>
 							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
 							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
 						</ButtonGroup>
@@ -54,13 +57,8 @@
 <script>
 import FormModal from "./form";
 import ViewModal from "./view";
-import API from "@/api/menu";
-function fmt(date) {
-	if (date instanceof Date) {
-		return `${date.getFullYear()}年${date.getMonth() +
-			1}月${date.getDate()}日`;
-	}
-}
+import API from "@/api/org";
+import DictAPI from "@/api/dict";
 export default {
 	components: {
 		FormModal,
@@ -72,7 +70,7 @@ export default {
 				page: 1,
 				limit: 10
 			},
-			totalElemens: 20,
+			totalElemens: 0,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],
@@ -81,21 +79,24 @@ export default {
 				{ type: "index", title: "序号", width: 80, align: "center" },
 				{
 					title: "名称",
-					key: "title"
+					key: "name",
+					align: "center"
 				},
 				{
 					title: "代码",
-					key: "code"
+					key: "code",
+					align: "center"
 				},
 				{
-					title: "路由",
-					key: "router"
+					title: "类型",
+					slot: "type",
+					align: "center"
 				},
 				{
 					title: "操作",
 					slot: "action",
 					align: "center",
-					width: 250
+					width: 300
 				}
 			],
 			menus: [],
@@ -106,6 +107,9 @@ export default {
 		this.handleSearch();
 	},
 	methods: {
+		async handleTypeLabel(value) {
+			return await DictAPI.Query({ code: "orgType", value });
+		},
 		async handleSearch() {
 			const _this = this;
 			this.menus = await API.Tree();
@@ -117,7 +121,7 @@ export default {
 			const _this = this;
 			if (this.query.name) {
 				this.list = this.list.filter(item => {
-					return new RegExp(_this.query.name).test(item.title);
+					return new RegExp(_this.query.name).test(item.name);
 				});
 			}
 		},

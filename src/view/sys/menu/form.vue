@@ -51,7 +51,7 @@
 	</Modal>
 </template>
 <script>
-import MenuApi from "@/api/menu";
+import API from "@/api/menu";
 import TreeSelection from "@/components/TreeSelection";
 export default {
 	components: {
@@ -91,7 +91,7 @@ export default {
 		};
 	},
 	async created() {
-		this.tree = await MenuApi.Tree();
+		this.tree = await API.Tree();
 	},
 	methods: {
 		show(row, type) {
@@ -109,10 +109,10 @@ export default {
 				this.loading = true;
 				if (res) {
 					let data = { ...this.form };
-					if (typeof data.parent.id === "undefined") {
+					if (!data.parent.id) {
 						delete data.parent;
 					}
-					let Save = data.id ? MenuApi.Update : MenuApi.Create;
+					let Save = data.id ? API.Update : API.Create;
 					await Save(data);
 					this.$emit("save", data);
 					this.visiable = false;
@@ -142,6 +142,37 @@ export default {
 					}
 				});
 			}
+		}
+	},
+	watch: {
+		"form.parent.title"(value, old) {
+			let sort = 0;
+			if (!value) {
+				this.form.parent.id = null;
+				console.info(this.tree);
+				sort = (this.tree.length + 1) * 10;
+			} else {
+				let parent = (function searchTree(arr, title) {
+					let res = null;
+					if (arr instanceof Array) {
+						arr.find(item => {
+							let isFind = false;
+							if (item.title === title) {
+								res = item;
+								isFind = true;
+							} else {
+								res = searchTree(item.children, title);
+							}
+							return isFind;
+						});
+					}
+					return res;
+				})(this.tree, value);
+				if (parent.children instanceof Array) {
+					sort = (parent.children.length + 1) * 10;
+				}
+			}
+			this.form.sort = sort;
 		}
 	}
 };

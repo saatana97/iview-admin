@@ -67,7 +67,7 @@ export default {
 				page: 1,
 				limit: 10
 			},
-			totalElemens: 20,
+			totalElemens: 0,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],

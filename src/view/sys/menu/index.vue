@@ -55,12 +55,6 @@
 import FormModal from "./form";
 import ViewModal from "./view";
 import API from "@/api/menu";
-function fmt(date) {
-	if (date instanceof Date) {
-		return `${date.getFullYear()}年${date.getMonth() +
-			1}月${date.getDate()}日`;
-	}
-}
 export default {
 	components: {
 		FormModal,
@@ -72,7 +66,7 @@ export default {
 				page: 1,
 				limit: 10
 			},
-			totalElemens: 20,
+			totalElemens: 0,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],

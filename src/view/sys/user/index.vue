@@ -70,7 +70,7 @@ export default {
 				limit: 10,
 				authorizer: {}
 			},
-			totalElemens: 20,
+			totalElemens: 0,
 			listLoading: true,
 			currentRow: null,
 			selectedRows: [],
