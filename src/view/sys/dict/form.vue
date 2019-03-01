@@ -16,7 +16,12 @@
 		</template>
 		<Form :model="form" :rules="rules" :label-width="80" ref="form">
 			<FormItem label="类型" prop="type">
-				<Input v-model="form.type" clearable placeholder="请输入字典类型"></Input>
+				<AutoComplete
+					v-model="form.type"
+					:data="types"
+					@on-search="handleTypeComplete"
+					placeholder="请输入字典类型"
+				></AutoComplete>
 			</FormItem>
 			<FormItem label="标签" prop="label">
 				<Input v-model="form.label" clearable placeholder="请输入字典标签"></Input>
@@ -45,6 +50,7 @@
 </template>
 <script>
 import API from "@/api/dict";
+import ArrayUtils from "@/scripts/ArrayUtils";
 export default {
 	data() {
 		const _this = this;
@@ -52,6 +58,7 @@ export default {
 			visiable: false,
 			loading: false,
 			type: "create",
+			types: [],
 			form: { sort: 0 },
 			_form: "",
 			rules: {
@@ -165,6 +172,12 @@ export default {
 					}
 				});
 			}
+		},
+		async handleTypeComplete(type) {
+			let res = await API.List({ type });
+			this.types = ArrayUtils.Unique(res).map(item => {
+				return item.type;
+			});
 		}
 	},
 	watch: {

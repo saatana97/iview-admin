@@ -1,12 +1,12 @@
 import { Post } from './ajax';
 import Base from './base';
 const api = {
-  ...Base('authorizer'),
+  ...Base('auth'),
   Login(data) {
-    return Post('authorizer/login', data);
+    return Post('auth/login', data);
   },
   Logout() {
-    return Post('authorizer/logout');
+    return Post('auth/logout');
   }
 };
 export default api;

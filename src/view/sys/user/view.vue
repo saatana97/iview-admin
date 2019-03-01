@@ -7,12 +7,14 @@
 		<CellGroup>
 			<Cell title="姓名" label="name" :extra="form.name"/>
 			<Cell title="年龄" label="age" :extra="form.age+''"/>
+			<Cell title="性别" label="sex" :extra="sexText"/>
 			<Cell title="地址" label="address" :extra="form.address"/>
-			<Cell title="创建者" label="creator" :extra="form.creator"/>
+			<Cell title="生日" label="birthday" :extra="form.birthday"/>
+			<Cell title="创建者" label="creator" :extra="form.creatorUsername"/>
 			<Cell title="创建时间" label="createDate" :extra="form.createDate"/>
-			<Cell title="最后更新者" label="updator" :extra="form.updator"/>
+			<Cell title="最后更新者" label="updator" :extra="form.updatorUsername"/>
 			<Cell title="最后更新时间" label="updateDate" :extra="form.updateDate"/>
-			<Cell title="最后登陆时间" label="loginDate" :extra="form.loginDate"/>
+			<Cell title="最后登陆时间" label="loginDate" :extra="form.authorizer.loginDate"/>
 			<Input
 				v-model="form.description"
 				type="textarea"
@@ -24,16 +26,22 @@
 	</Modal>
 </template>
 <script>
+import API from "@/api/dict";
 export default {
 	data() {
 		return {
 			visiable: false,
-			form: {}
+			sexText: "",
+			form: { authorizer: {} }
 		};
 	},
 	methods: {
-		show(row) {
+		async show(row) {
 			this.form = row;
+			this.sexText = await API.Query({
+				type: "性别",
+				value: row.sex || ""
+			});
 			this.visiable = true;
 		}
 	}
