@@ -81,15 +81,18 @@ export default {
 				{ type: "index", title: "序号", width: 80, align: "center" },
 				{
 					title: "名称",
-					key: "title"
+					key: "title",
+					align: "center"
 				},
 				{
 					title: "代码",
-					key: "code"
+					key: "code",
+					align: "center"
 				},
 				{
 					title: "路由",
-					key: "router"
+					key: "router",
+					align: "center"
 				},
 				{
 					title: "操作",

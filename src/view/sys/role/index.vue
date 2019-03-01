@@ -85,15 +85,18 @@ export default {
 				},
 				{
 					title: "名称",
-					key: "name"
+					key: "name",
+					align: "center"
 				},
 				{
 					title: "代码",
-					key: "code"
+					key: "code",
+					align: "center"
 				},
 				{
 					title: "权限",
-					key: "menusName"
+					key: "menusName",
+					align: "center"
 				},
 				{
 					title: "操作",

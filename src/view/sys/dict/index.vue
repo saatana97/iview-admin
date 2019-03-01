@@ -8,6 +8,7 @@
 				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
 				<Divider/>
 				<Input v-model="query.type" placeholder="请输入字典类型" clearable style="width: 200px"/>
+				<Input v-model="query.code" placeholder="请输入字典代码" clearable style="width: 200px"/>
 				<Input v-model="query.label" placeholder="请输入字典标签" clearable style="width: 200px"/>
 				<Input v-model="query.value" placeholder="请输入字典值" clearable style="width: 200px"/>
 				<Button type="primary" icon="ios-search" :loading="listLoading" @click="handleSearch">搜索</Button>
@@ -66,6 +67,7 @@ export default {
 				page: 1,
 				limit: 10,
 				type: null,
+				code: null,
 				label: null,
 				value: null
 			},
@@ -87,23 +89,28 @@ export default {
 				},
 				{
 					title: "类型",
-					key: "type"
+					key: "type",
+					align: "center"
 				},
 				{
 					title: "代码",
-					key: "code"
+					key: "code",
+					align: "center"
 				},
 				{
 					title: "标签",
-					key: "label"
+					key: "label",
+					align: "center"
 				},
 				{
 					title: "值",
-					key: "value"
+					key: "value",
+					align: "center"
 				},
 				{
 					title: "描述",
-					key: "desceription"
+					key: "desceription",
+					align: "center"
 				},
 				{
 					title: "操作",

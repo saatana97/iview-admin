@@ -88,15 +88,18 @@ export default {
 				},
 				{
 					title: "姓名",
-					key: "name"
+					key: "name",
+					align: "center"
 				},
 				{
 					title: "用户名",
-					slot: "username"
+					slot: "username",
+					align: "center"
 				},
 				{
 					title: "地址",
-					key: "address"
+					key: "address",
+					align: "center"
 				},
 				{
 					title: "操作",
