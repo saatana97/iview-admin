@@ -114,6 +114,7 @@ export default {
 			const _this = this;
 			this.menus = await API.Tree();
 			this.list = this.handleTreeToArray(this.menus);
+			this.totalElemens = res.totalElements;
 			this.handleFilter();
 			_this.listLoading = false;
 		},
@@ -183,9 +184,11 @@ export default {
 		},
 		handlePageChange(index) {
 			this.query.page = index;
+			this.handleSearch();
 		},
 		handleLimitChange(size) {
 			this.query.limit = size;
+			this.handleSearch();
 		},
 		handleRowChange(currentRow, lastRow) {
 			this.currentRow = currentRow;

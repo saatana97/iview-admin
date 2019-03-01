@@ -104,7 +104,7 @@ export default {
 								}
 							}
 						},
-						trigger: "change"
+						trigger: "blur"
 					}
 				],
 				value: [
@@ -133,7 +133,7 @@ export default {
 								}
 							}
 						},
-						trigger: "change"
+						trigger: "blur"
 					}
 				]
 			}

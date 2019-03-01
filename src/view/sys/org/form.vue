@@ -8,31 +8,32 @@
 	>
 		<template slot="header" v-if="type === 'create'">
 			<Icon type="md-add-circle"/>
-			<span>添加菜单</span>
+			<span>添加组织机构</span>
 		</template>
 		<template slot="header" v-else>
 			<Icon type="ios-create"/>
-			<span>编辑菜单</span>
+			<span>编辑组织机构</span>
 		</template>
 		<Form :model="form" :rules="rules" :label-width="80" ref="form">
-			<FormItem label="名称" prop="title">
-				<Input v-model="form.title" clearable placeholder="请输入菜单名称"></Input>
+			<FormItem label="名称" prop="name">
+				<Input v-model="form.name" clearable placeholder="请输入组织机构名称"></Input>
 			</FormItem>
 			<FormItem label="代码" prop="code">
-				<Input v-model="form.code" clearable placeholder="请输入菜单代码"></Input>
+				<Input v-model="form.code" clearable placeholder="请输入组织机构代码"></Input>
 			</FormItem>
-			<FormItem label="路径" prop="router">
-				<Input v-model="form.router" clearable placeholder="请输入菜单路由路径"></Input>
+			<FormItem label="类型" prop="type">
+				<Select v-model="form.type" clearable placeholder="请选择组织机构类型">
+					<Option v-for="item in types" :value="item.value" :key="item.value">{{ item.label }}</Option>
+				</Select>
 			</FormItem>
-			<FormItem label="图标" prop="icon">
-				<Input v-model="form.icon" clearable placeholder="请输入菜单图标"></Input>
+			<FormItem label="级别" prop="level">
+				<Select v-model="form.type" clearable placeholder="请选择组织机构级别">
+					<Option v-for="item in levels" :value="item.value" :key="item.value">{{ item.label }}</Option>
+				</Select>
 			</FormItem>
-			<FormItem label="排序" prop="sort">
-				<InputNumber v-model="form.sort" style="width:100%;"></InputNumber>
-			</FormItem>
-			<FormItem label="上级菜单" prop="parent">
-				<Input v-model="form.parent.title" clearable placeholder="请选择上级菜单" readonly style="width:80%"></Input>
-				<TreeSelection placeholder="请选择上级菜单" title="请选择上级菜单" :data="tree" @ok="handleTreeOk"></TreeSelection>
+			<FormItem label="上级组织机构" prop="parent">
+				<Input v-model="form.parent.name" clearable placeholder="请选择上级组织机构" readonly style="width:80%"></Input>
+				<TreeSelection placeholder="请选择上级组织机构" title="请选择上级组织机构" :data="tree" @ok="handleTreeOk"></TreeSelection>
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
@@ -51,7 +52,8 @@
 	</Modal>
 </template>
 <script>
-import MenuApi from "@/api/menu";
+import API from "@/api/menu";
+import DictAPI from "@/api/dict";
 import TreeSelection from "@/components/TreeSelection";
 export default {
 	components: {
@@ -65,6 +67,8 @@ export default {
 			form: { parent: { title: "" } },
 			_form: "",
 			tree: [],
+			types: [],
+			levels: [],
 			rules: {
 				title: [
 					{
@@ -91,7 +95,9 @@ export default {
 		};
 	},
 	async created() {
-		this.tree = await MenuApi.Tree();
+		this.tree = await API.Tree();
+		this.types = await API.List({ type: "orgType" });
+		this.levels = await API.List({ type: "orgLevel" });
 	},
 	methods: {
 		show(row, type) {
@@ -111,10 +117,10 @@ export default {
 				this.loading = true;
 				if (res) {
 					let data = { ...this.form };
-					if (typeof data.parent.id === "undefined") {
+					if (!data.parent.id) {
 						delete data.parent;
 					}
-					let Save = data.id ? MenuApi.Update : MenuApi.Create;
+					let Save = data.id ? API.Update : API.Create;
 					await Save(data);
 					this.$emit("save", data);
 					this.visiable = false;
@@ -144,6 +150,36 @@ export default {
 					}
 				});
 			}
+		}
+	},
+	watch: {
+		"form.parent.name"(value, old) {
+			let sort = 0;
+			if (!value) {
+				this.form.parent.id = null;
+				sort = (this.tree.length + 1) * 10;
+			} else {
+				let parent = (function searchTree(arr, name) {
+					let res = null;
+					if (arr instanceof Array) {
+						arr.find(item => {
+							let isFind = false;
+							if (item.name === name) {
+								res = item;
+								isFind = true;
+							} else {
+								res = searchTree(item.children, name);
+							}
+							return isFind;
+						});
+					}
+					return res;
+				})(this.tree, value);
+				if (parent.children instanceof Array) {
+					sort = (parent.children.length + 1) * 10;
+				}
+			}
+			this.form.sort = sort;
 		}
 	}
 };

@@ -28,6 +28,7 @@
 				>
 					<template slot-scope="{ row, index }" slot="action">
 						<ButtonGroup>
+							<Button type="info" size="small" @click="handleChildren(row,index)">添加字典条目</Button>
 							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
 							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
 						</ButtonGroup>
@@ -115,7 +116,7 @@ export default {
 				{
 					title: "操作",
 					slot: "action",
-					width: 150,
+					width: 300,
 					align: "center"
 				}
 			],
@@ -131,7 +132,7 @@ export default {
 			this.listLoading = true;
 			let res = await API.Page(this.query);
 			this.list = res.content;
-			this.totalElemens = res.totalElemens;
+			this.totalElemens = res.totalElements;
 			this.listLoading = false;
 		},
 		handleReset() {
@@ -146,6 +147,9 @@ export default {
 		},
 		handleCreate() {
 			this.$refs.form.show();
+		},
+		handleChildren(row, index) {
+			this.$refs.form.show({ type: row.type, code: row.code });
 		},
 		handleExport() {},
 		handleImport() {},
@@ -181,9 +185,11 @@ export default {
 		},
 		handlePageChange(index) {
 			this.query.page = index;
+			this.handleSearch();
 		},
 		handleLimitChange(size) {
 			this.query.limit = size;
+			this.handleSearch();
 		},
 		handleRowChange(currentRow, lastRow) {
 			this.currentRow = currentRow;

@@ -121,7 +121,7 @@ export default {
 			this.listLoading = true;
 			let res = await API.Page(this.query);
 			this.list = res.content;
-			this.totalElemens = res.totalElemens;
+			this.totalElemens = res.totalElements;
 			this.listLoading = false;
 		},
 		handleReset() {
@@ -165,9 +165,11 @@ export default {
 		},
 		handlePageChange(index) {
 			this.query.page = index;
+			this.handleSearch();
 		},
 		handleLimitChange(size) {
 			this.query.limit = size;
+			this.handleSearch();
 		},
 		handleRowChange(currentRow, lastRow) {
 			this.currentRow = currentRow;
