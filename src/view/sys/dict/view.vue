@@ -5,7 +5,8 @@
 			<span>查看字典</span>
 		</template>
 		<CellGroup>
-			<Cell title="类型" label="type" :extra="form.type"/>
+			<Cell title="名称" label="type" :extra="form.type"/>
+			<Cell title="代码" label="code" :extra="form.code"/>
 			<Cell title="标签" label="label" :extra="form.label"/>
 			<Cell title="值" label="value" :extra="form.value"/>
 			<Cell title="排序" label="sort" :extra="form.sort+''"/>

@@ -90,6 +90,10 @@ export default {
 					key: "type"
 				},
 				{
+					title: "代码",
+					key: "code"
+				},
+				{
 					title: "标签",
 					key: "label"
 				},

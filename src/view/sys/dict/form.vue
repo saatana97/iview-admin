@@ -23,6 +23,14 @@
 					placeholder="请输入字典类型"
 				></AutoComplete>
 			</FormItem>
+			<FormItem label="代码" prop="code">
+				<AutoComplete
+					v-model="form.code"
+					:data="codes"
+					@on-search="handleCodeComplete"
+					placeholder="请输入字典代码"
+				></AutoComplete>
+			</FormItem>
 			<FormItem label="标签" prop="label">
 				<Input v-model="form.label" clearable placeholder="请输入字典标签"></Input>
 			</FormItem>
@@ -59,13 +67,14 @@ export default {
 			loading: false,
 			type: "create",
 			types: [],
+			codes: [],
 			form: { sort: 0 },
 			_form: "",
 			rules: {
-				type: [
+				code: [
 					{
 						required: true,
-						message: "字典类型不能为空",
+						message: "字典代码不能为空",
 						trigger: "change"
 					}
 				],
@@ -79,13 +88,13 @@ export default {
 						async validator(rule, value, cb) {
 							let old = JSON.parse(_this._form);
 							if (
-								old.type === _this.form.type &&
+								old.code === _this.form.code &&
 								old.label === value
 							) {
 								cb();
 							} else {
-								let res = await API.List({
-									type: _this.form.type,
+								let res = await API.Check({
+									code: _this.form.code,
 									label: _this.form.label
 								});
 								if (res.length === 0) {
@@ -108,13 +117,13 @@ export default {
 						async validator(rule, value, cb) {
 							let old = JSON.parse(_this._form);
 							if (
-								old.type === _this.form.type &&
+								old.code === _this.form.code &&
 								old.value === value
 							) {
 								cb();
 							} else {
-								let res = await API.List({
-									type: _this.form.type,
+								let res = await API.Check({
+									code: _this.form.code,
 									value: _this.form.value
 								});
 								if (res.length === 0) {
@@ -177,6 +186,12 @@ export default {
 			let res = await API.List({ type });
 			this.types = ArrayUtils.Unique(res).map(item => {
 				return item.type;
+			});
+		},
+		async handleCodeComplete(code) {
+			let res = await API.List({ code });
+			this.codes = ArrayUtils.Unique(res).map(item => {
+				return item.code;
 			});
 		}
 	},

@@ -39,7 +39,7 @@ export default {
 		async show(row) {
 			this.form = row;
 			this.sexText = await API.Query({
-				type: "性别",
+				code: "sex",
 				value: row.sex || ""
 			});
 			this.visiable = true;
