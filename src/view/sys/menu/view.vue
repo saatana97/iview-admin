@@ -13,6 +13,8 @@
 					<Icon :type="form.icon"/>
 				</template>
 			</Cell>
+			<Cell title="权限" label="permission" :extra="form.permission"/>
+			<Cell title="状态" label="display" :extra="form.show?'显示':'隐藏'"/>
 			<Cell title="创建者" label="creator" :extra="form.creatorUsername"/>
 			<Cell title="创建时间" label="createDate" :extra="form.createDate"/>
 			<Cell title="最后更新者" label="updator" :extra="form.updatorUsername"/>

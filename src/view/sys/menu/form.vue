@@ -27,12 +27,23 @@
 			<FormItem label="图标" prop="icon">
 				<Input v-model="form.icon" clearable placeholder="请输入菜单图标"></Input>
 			</FormItem>
+			<FormItem label="权限" prop="permission">
+				<Tooltip content="多个权限使用英文逗号分隔" placement="bottom" style="width:100%;">
+					<Input v-model="form.permission" clearable placeholder="请输入菜单代表的权限"></Input>
+				</Tooltip>
+			</FormItem>
 			<FormItem label="排序" prop="sort">
 				<InputNumber v-model="form.sort" style="width:100%;"></InputNumber>
 			</FormItem>
 			<FormItem label="上级菜单" prop="parent">
 				<Input v-model="form.parent.title" clearable placeholder="请选择上级菜单" readonly style="width:80%"></Input>
 				<TreeSelection placeholder="请选择上级菜单" title="请选择上级菜单" :data="tree" @ok="handleTreeOk"></TreeSelection>
+			</FormItem>
+			<FormItem label="是否显示">
+				<i-Switch size="large" v-model="form.display">
+					<span slot="open">YES</span>
+					<span slot="close">NO</span>
+				</i-Switch>
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
@@ -58,12 +69,14 @@ export default {
 		TreeSelection
 	},
 	data() {
+		const _this = this;
 		return {
 			visiable: false,
 			loading: false,
 			type: "create",
-			form: { parent: { title: "" } },
+			form: { parent: { title: "" }, display: true },
 			_form: "",
+			oldCode: null,
 			tree: [],
 			rules: {
 				title: [
@@ -78,6 +91,23 @@ export default {
 						required: true,
 						message: "菜单代码不能为空",
 						trigger: "change"
+					},
+					{
+						async validator(rule, value, cb) {
+							if (_this.oldCode === value) {
+								cb();
+							} else {
+								let res = await API.Check({
+									code: value
+								});
+								if (res.length === 0) {
+									cb();
+								} else {
+									cb(new Error("菜单代码已存在"));
+								}
+							}
+						},
+						trigger: "blur"
 					}
 				],
 				router: [
@@ -96,12 +126,13 @@ export default {
 	methods: {
 		show(row, type) {
 			this.visiable = true;
-			this.form = row ? JSON.parse(JSON.stringify(row)) : this.form;
+			this.form = row ? { ...row, children: [] } : this.form;
 			this._form = JSON.stringify(this.form);
+			this.oldCode = this.form.code;
 			this.type = type || "create";
 		},
 		handleTreeOk(arr) {
-			this.form.parent = arr[0];
+			this.form.parent = arr[0].data;
 		},
 		handleSave() {
 			const _this = this;
@@ -148,8 +179,7 @@ export default {
 		"form.parent.title"(value, old) {
 			let sort = 0;
 			if (!value) {
-				this.form.parent.id = null;
-				console.info(this.tree);
+				delete this.form.parent.id;
 				sort = (this.tree.length + 1) * 10;
 			} else {
 				let parent = (function searchTree(arr, title) {
@@ -177,3 +207,14 @@ export default {
 	}
 };
 </script>
+<style>
+.tips {
+	color: #808695;
+}
+.tips::before {
+	content: "※";
+}
+.tips::after {
+	content: "※";
+}
+</style>

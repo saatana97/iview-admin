@@ -29,19 +29,20 @@
 					:open-names="openMenus"
 					ref="leftMenu"
 				>
-					<Submenu :name="item.code" v-for="(item,index) in menus" :key="index">
+					<Submenu :name="item.code" v-for="(item,index) in menus" :key="index" v-if="item.data.display">
 						<template slot="title">
-							<Icon :type="item.icon"></Icon>
+							<Icon :type="item.data.icon"></Icon>
 							{{item.title}}
 						</template>
 						<MenuItem
-							:name="children.code"
+							v-if="children.data.display"
 							v-for="(children,cindex) in item.children"
+							:name="children.code"
 							:key="cindex"
-							:to="children.router"
+							:to="children.data.router"
 						>
-							<Icon :type="children.icon"></Icon>
-							{{children.title}}
+							<Icon :type="children.data.icon"></Icon>
+							{{children.data.title}}
 						</MenuItem>
 					</Submenu>
 				</Menu>
@@ -206,7 +207,7 @@ export default {
 				let res = false;
 				if (arr instanceof Array) {
 					res = arr.find(item => {
-						let same = item.router === fullPath;
+						let same = item.data.router === fullPath;
 						if (same) {
 							menu = item;
 							return same;
@@ -223,7 +224,7 @@ export default {
 				return res;
 			})(this.menus);
 			if (!tab && menu) {
-				this.addTab(menu.title, menu.router);
+				this.addTab(menu.title, menu.data.router);
 			}
 			this.goMenu(parents, menu);
 		}

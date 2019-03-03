@@ -26,9 +26,9 @@
 				>
 					<template slot-scope="{ row, index }" slot="action">
 						<ButtonGroup>
-							<Button type="info" size="small" @click="handleChildren(row,index)">添加下级菜单</Button>
 							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
 							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
+							<Button type="info" size="small" @click="handleChildren(row,index)">添加下级菜单</Button>
 						</ButtonGroup>
 					</template>
 				</Table>
@@ -91,6 +91,7 @@ export default {
 	methods: {
 		async handleSearch() {
 			const _this = this;
+			let res = await API.Tree();
 			this.menus = await API.Tree();
 			this.list = this.handleTreeToArray(this.menus);
 			this.handleFilter();
@@ -156,8 +157,8 @@ export default {
 			(function scanle(parent, arr, res) {
 				if (arr instanceof Array) {
 					arr.forEach(item => {
-						item.parent = { ...parent, children: [] };
-						res.push(item);
+						item.data.parent = { ...parent, children: [] };
+						res.push(item.data);
 						scanle(item, item.children, res);
 					});
 				}
