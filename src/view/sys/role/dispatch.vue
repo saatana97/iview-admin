@@ -61,15 +61,15 @@ export default {
 					roles: auth.roles
 				});
 			});
-			this.olds = this.auths.filter(item => {
+			this.auths.forEach(item => {
 				let roleIds = item.roles.map(role => {
 					return role.id;
 				});
-				return roleIds.indexOf(_this.role.id) !== -1;
+				if (roleIds.indexOf(_this.role.id) !== -1) {
+					this.olds.push(_this.role.id);
+				}
 			});
-			this.dispatchs = this.targetKeys = this.olds.map(item => {
-				return item.key;
-			});
+			this.dispatchs = this.targetKeys = [...this.olds];
 			this.visiable = true;
 		},
 		handleFilter() {
@@ -114,7 +114,7 @@ export default {
 			this.dispatchs = this.targetKeys = targetKeys;
 		},
 		handleCancel() {
-			if (this.targetKeys.length === this.olds.length) {
+			if (this.targetKeys.join(",") === this.olds.join(",")) {
 				this.visiable = false;
 			} else {
 				this.$Modal.confirm({
