@@ -143,10 +143,10 @@ export default {
 			this.$refs.form.show();
 		},
 		handleView(row, index) {
-			this.$refs.view.show(row);
+			this.$refs.view.show({ ...row, parent: row.parent.data });
 		},
 		handleUpdate(row, index) {
-			this.$refs.form.show(row, "update");
+			this.$refs.form.show({ ...row, parent: row.parent.data }, "update");
 		},
 		handleChildren(row, index) {
 			this.$refs.form.show({ parent: row }, "create");
@@ -187,8 +187,8 @@ export default {
 			(function scanle(parent, arr, res) {
 				if (arr instanceof Array) {
 					arr.forEach(item => {
-						item.parent = { ...parent, children: [] };
-						res.push(item);
+						item.data.parent = { ...parent, children: [] };
+						res.push(item.data);
 						scanle(item, item.children, res);
 					});
 				}

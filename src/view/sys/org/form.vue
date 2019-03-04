@@ -126,9 +126,18 @@ export default {
 	},
 	methods: {
 		async show(row, type) {
-			this.form = row ? JSON.parse(JSON.stringify(row)) : this.form;
-			this.form.type += "";
-			this.form.level += "";
+			this.form = row ? { ...row } : this.form;
+			if (!this.form.parent) {
+				this.form.parent = {};
+			}
+			if (this.form.type) {
+				this.form.type += "";
+			} else {
+				this.form.type = this.types[0].value + "";
+			}
+			if (this.form.level) {
+				this.form.level += "";
+			}
 			this.oldTitle = this.form.title;
 			if (row && row.parent && row.parent.level) {
 				this.form.level = +row.parent.level + 1 + "";
@@ -164,7 +173,7 @@ export default {
 			this.visiable = true;
 		},
 		handleTreeOk(arr) {
-			this.form.parent = arr[0];
+			this.form.parent = arr[0].data;
 		},
 		handleSave() {
 			const _this = this;

@@ -38,11 +38,11 @@ export default {
 	methods: {
 		async show(row) {
 			this.form = row;
-			this.typeLabel = await DictAPi.Query({
+			this.typeLabel = await DictAPI.Query({
 				code: "orgType",
 				value: this.form.type
 			});
-			this.levelLabel = await DictAPi.Query({
+			this.levelLabel = await DictAPI.Query({
 				code: "orgLevel",
 				value: this.form.level
 			});
