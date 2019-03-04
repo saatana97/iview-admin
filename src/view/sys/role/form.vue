@@ -22,13 +22,10 @@
 			<FormItem label="代码" prop="code">
 				<Input v-model="form.code" clearable placeholder="请输入角色代码"></Input>
 			</FormItem>
-			<FormItem label="可查看菜单" prop="menus">
-				<Transfer
-					:data="menus"
-					:target-keys="targetKeys"
-					:titles="['未分配菜单','已拥有菜单']"
-					@on-change="handleTransfer"
-				></Transfer>
+			<FormItem label="权限分配" prop="menus">
+				<div style="max-height:30vh;overflow:auto;">
+					<Tree :data="menus" show-checkbox ref="menuTree"></Tree>
+				</div>
 			</FormItem>
 			<FormItem label="备注" prop="description">
 				<Input
@@ -48,8 +45,8 @@
 </template>
 <script>
 import TreeSelection from "@/components/TreeSelection";
-import MenuApi from "@/api/menu";
-import RoleApi from "@/api/role";
+import MenuAPI from "@/api/menu";
+import RoleAPI from "@/api/role";
 export default {
 	components: {
 		TreeSelection
@@ -94,20 +91,8 @@ export default {
 			}
 		};
 	},
-	async created() {
-		const _this = this;
-		((await MenuApi.List({})) || []).forEach(menu => {
-			_this.menus.push({
-				key: menu.id,
-				label: menu.title,
-				description: menu.description,
-				disabled: false
-			});
-		});
-	},
 	methods: {
-		show(row, type) {
-			this.visiable = true;
+		async show(row, type) {
 			this.form = row
 				? JSON.parse(JSON.stringify(row))
 				: { menus: [], menusName: "" };
@@ -116,14 +101,25 @@ export default {
 			});
 			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
+			if (this.form.id) {
+				this.menus = await MenuAPI.TreeByRole(this.form.id);
+			} else {
+				this.menus = await MenuAPI.Tree();
+			}
+			this.visiable = true;
 		},
 		handleSave() {
 			const _this = this;
+			this.form.menus = this.$refs.menuTree
+				.getCheckedAndIndeterminateNodes()
+				.map(item => {
+					return { id: item.data.id };
+				});
 			this.$refs.form.validate(async res => {
 				this.loading = true;
 				if (res) {
 					let data = { ...this.form };
-					let Save = data.id ? RoleApi.Update : RoleApi.Create;
+					let Save = data.id ? RoleAPI.Update : RoleAPI.Create;
 					await Save(data);
 					this.$emit("save", data);
 					this.visiable = false;
