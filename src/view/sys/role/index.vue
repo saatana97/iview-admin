@@ -24,9 +24,9 @@
 				>
 					<template slot-scope="{ row, index }" slot="action">
 						<ButtonGroup>
-							<Button type="info" size="small" @click="handleDispatch(row,index)">分配用户</Button>
 							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
 							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
+							<Button type="info" size="small" @click="handleDispatch(row,index)">分配用户</Button>
 						</ButtonGroup>
 						<dispatch ref="dispatch"/>
 					</template>
