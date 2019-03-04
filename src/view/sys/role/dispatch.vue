@@ -9,8 +9,15 @@
 			<Icon type="ios-list-box"/>
 			<span>分配用户</span>
 		</template>
+		<Input
+			v-model="filterName"
+			clearable
+			placeholder="请输入要筛选的用户名"
+			suffix="ios-search"
+			style="margin-bottom:10px;"
+		></Input>
 		<Transfer
-			:data="auths"
+			:data="handleFilter()"
 			:target-keys="targetKeys"
 			:titles="['未分配用户','已分配用户']"
 			@on-change="handleTransfer"
@@ -33,6 +40,7 @@ export default {
 			auths: [],
 			dispatchs: [],
 			targetKeys: [],
+			filterName: null,
 			olds: []
 		};
 	},
@@ -63,6 +71,19 @@ export default {
 				return item.key;
 			});
 			this.visiable = true;
+		},
+		handleFilter() {
+			let res = [];
+			if (this.filterName) {
+				this.auths.forEach(item => {
+					if (item.label.indexOf(this.filterName) !== -1) {
+						res.push(item);
+					}
+				});
+			} else {
+				res = this.auths;
+			}
+			return res;
 		},
 		async handleSave() {
 			this.loading = true;
