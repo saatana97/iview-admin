@@ -24,7 +24,7 @@
 			</FormItem>
 			<FormItem label="权限分配" prop="menus">
 				<div style="max-height:30vh;overflow:auto;">
-					<Tree :data="menus" show-checkbox ref="menuTree"></Tree>
+					<Tree :data="menus" show-checkbox ref="menuTree" @on-check-change="handleTreeCheckChange"></Tree>
 				</div>
 			</FormItem>
 			<FormItem label="备注" prop="description">
@@ -55,11 +55,11 @@ export default {
 		return {
 			visiable: false,
 			loading: false,
+			modify: 0,
 			type: "create",
 			form: { menus: [], menusName: "" },
 			targetKeys: [],
 			menus: [],
-			_form: "",
 			rules: {
 				name: [
 					{
@@ -99,7 +99,6 @@ export default {
 			this.targetKeys = this.form.menus.map(item => {
 				return item.id;
 			});
-			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
 			if (this.form.id) {
 				this.menus = await MenuAPI.TreeByRole(this.form.id);
@@ -110,11 +109,6 @@ export default {
 		},
 		handleSave() {
 			const _this = this;
-			this.form.menus = this.$refs.menuTree
-				.getCheckedAndIndeterminateNodes()
-				.map(item => {
-					return { id: item.data.id };
-				});
 			this.$refs.form.validate(async res => {
 				this.loading = true;
 				if (res) {
@@ -130,21 +124,21 @@ export default {
 				}
 			});
 		},
-		handleTransfer(targetKeys, direction, moveKeys) {
-			this.targetKeys = targetKeys;
-			const _this = this;
-			this.form.menus = this.targetKeys.map(item => {
-				return { id: item };
+		handleTreeCheckChange(checked, node) {
+			this.form.menus = checked.map(item => {
+				return { id: item.data.id };
 			});
 		},
 		handleVisiableChange(visiable) {
-			if (!visiable) {
+			if (visiable) {
+				this.modify = 0;
+			} else {
 				this.loading = false;
 				this.$refs.form.resetFields();
 			}
 		},
 		handleCancel() {
-			if (JSON.stringify(this.form) === this._form) {
+			if (this.modify === 0) {
 				this.visiable = false;
 			} else {
 				this.$Modal.confirm({
@@ -155,6 +149,14 @@ export default {
 						this.visiable = false;
 					}
 				});
+			}
+		}
+	},
+	watch: {
+		form: {
+			deep: true,
+			handler: function() {
+				this.modify++;
 			}
 		}
 	}

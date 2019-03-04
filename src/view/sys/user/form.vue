@@ -64,10 +64,10 @@ export default {
 		return {
 			visiable: false,
 			loading: false,
+			modify: 0,
+			form: { authorizer: {} },
 			type: "create",
 			oldUsername: "",
-			form: { authorizer: {} },
-			_form: "",
 			rules: {
 				"authorizer.username": [
 					{
@@ -130,15 +130,15 @@ export default {
 			}
 		};
 	},
+
 	methods: {
 		show(row, type) {
-			this.visiable = true;
 			this.form = row
 				? JSON.parse(JSON.stringify(row))
 				: { authorizer: {} };
 			this.oldUsername = this.form.authorizer.username;
-			this._form = JSON.stringify(this.form);
 			this.type = type || "create";
+			this.visiable = true;
 		},
 		handleSave() {
 			const _this = this;
@@ -157,13 +157,15 @@ export default {
 			});
 		},
 		handleVisiableChange(visiable) {
-			if (!visiable) {
+			if (visiable) {
+				this.modify = -1;
+			} else {
 				this.loading = false;
 				this.$refs.form.resetFields();
 			}
 		},
 		handleCancel() {
-			if (JSON.stringify(this.form) === this._form) {
+			if (this.modify === 0) {
 				this.visiable = false;
 			} else {
 				this.$Modal.confirm({
@@ -174,6 +176,14 @@ export default {
 						this.visiable = false;
 					}
 				});
+			}
+		}
+	},
+	watch: {
+		form: {
+			deep: true,
+			handler: function() {
+				this.modify++;
 			}
 		}
 	}

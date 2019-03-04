@@ -65,11 +65,14 @@ export default {
 		return {
 			visiable: false,
 			loading: false,
+			modify: 0,
 			type: "create",
 			types: [],
 			codes: [],
 			form: { value: 0, sort: 0 },
-			_form: "",
+			oldCode: null,
+			oldLabel: null,
+			oldValue: null,
 			rules: {
 				code: [
 					{
@@ -86,10 +89,9 @@ export default {
 					},
 					{
 						async validator(rule, value, cb) {
-							let old = JSON.parse(_this._form);
 							if (
-								old.code === _this.form.code &&
-								old.label === value
+								_this.oldCode === _this.form.code &&
+								_this.oldLabel === value
 							) {
 								cb();
 							} else {
@@ -115,10 +117,9 @@ export default {
 					},
 					{
 						async validator(rule, value, cb) {
-							let old = JSON.parse(_this._form);
 							if (
-								old.code === _this.form.code &&
-								old.value === value
+								this.oldCode === _this.form.code &&
+								this.oldValue === value
 							) {
 								cb();
 							} else {
@@ -143,7 +144,9 @@ export default {
 		async show(row, type) {
 			this.visiable = true;
 			this.form = row ? JSON.parse(JSON.stringify(row)) : this.form;
-			this._form = JSON.stringify(this.form);
+			this.oldCode = this.form.code;
+			this.oldLabel = this.form.label;
+			this.oldValue = this.oldValue;
 			this.type = type || "create";
 		},
 		handleSave() {
@@ -163,13 +166,15 @@ export default {
 			});
 		},
 		handleVisiableChange(visiable) {
-			if (!visiable) {
+			if (visiable) {
+				this.modify = 0;
+			} else {
 				this.loading = false;
 				this.$refs.form.resetFields();
 			}
 		},
 		handleCancel() {
-			if (JSON.stringify(this.form) === this._form) {
+			if (this.modify === 0) {
 				this.visiable = false;
 			} else {
 				this.$Modal.confirm({
@@ -196,6 +201,12 @@ export default {
 		}
 	},
 	watch: {
+		form: {
+			deep: true,
+			handler: function() {
+				this.modify++;
+			}
+		},
 		async "form.code"(value, old) {
 			if (this.type === "create") {
 				let res = await API.Check({ code: value });

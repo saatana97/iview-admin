@@ -64,9 +64,9 @@ export default {
 		return {
 			visiable: false,
 			loading: false,
+			modify: 0,
 			type: "create",
 			form: { parent: {} },
-			_form: "",
 			oldTitle: null,
 			tree: [],
 			types: [],
@@ -129,7 +129,6 @@ export default {
 			this.form = row ? JSON.parse(JSON.stringify(row)) : this.form;
 			this.form.type += "";
 			this.form.level += "";
-			this._form = JSON.stringify(this.form);
 			this.oldTitle = this.form.title;
 			if (row && row.parent && row.parent.level) {
 				this.form.level = +row.parent.level + 1 + "";
@@ -188,13 +187,15 @@ export default {
 			});
 		},
 		handleVisiableChange(visiable) {
-			if (!visiable) {
+			if (visiable) {
+				this.modify = 0;
+			} else {
 				this.loading = false;
 				this.$refs.form.resetFields();
 			}
 		},
 		handleCancel() {
-			if (JSON.stringify(this.form) === this._form) {
+			if (this.modify === 0) {
 				this.visiable = false;
 			} else {
 				this.$Modal.confirm({
@@ -209,6 +210,12 @@ export default {
 		}
 	},
 	watch: {
+		form: {
+			deep: true,
+			handler: function() {
+				this.modify++;
+			}
+		},
 		"form.parent.title"(value, old) {
 			let sort = 0;
 			if (!value) {

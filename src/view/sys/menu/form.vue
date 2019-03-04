@@ -73,9 +73,9 @@ export default {
 		return {
 			visiable: false,
 			loading: false,
+			modify: 0,
 			type: "create",
 			form: { parent: { title: "" }, display: true },
-			_form: "",
 			oldCode: null,
 			tree: [],
 			rules: {
@@ -127,7 +127,6 @@ export default {
 		show(row, type) {
 			this.visiable = true;
 			this.form = row ? { ...row, children: [] } : this.form;
-			this._form = JSON.stringify(this.form);
 			this.oldCode = this.form.code;
 			this.type = type || "create";
 		},
@@ -155,13 +154,15 @@ export default {
 			});
 		},
 		handleVisiableChange(visiable) {
-			if (!visiable) {
+			if (visiable) {
+				this.modify = 0;
+			} else {
 				this.loading = false;
 				this.$refs.form.resetFields();
 			}
 		},
 		handleCancel() {
-			if (JSON.stringify(this.form) === this._form) {
+			if (this.modify === 0) {
 				this.visiable = false;
 			} else {
 				this.$Modal.confirm({
@@ -176,6 +177,12 @@ export default {
 		}
 	},
 	watch: {
+		form: {
+			deep: true,
+			handler: function() {
+				this.modify++;
+			}
+		},
 		"form.parent.title"(value, old) {
 			let sort = 0;
 			if (!value) {
