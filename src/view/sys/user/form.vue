@@ -58,6 +58,7 @@
 <script>
 import UserApi from "@/api/user";
 import AuthApi from "@/api/auth";
+import DateUtils from "@/scripts/DateUtils";
 export default {
 	data() {
 		const _this = this;
@@ -146,7 +147,13 @@ export default {
 				this.loading = true;
 				if (res) {
 					let Save = _this.form.id ? UserApi.Update : UserApi.Create;
-					await Save(_this.form);
+					await Save({
+						..._this.form,
+						birthday: DateUtils.Format(
+							_this.form.birthday,
+							"yyyy年MM月dd日"
+						)
+					});
 					this.$emit("save", _this.form);
 					_this.visiable = false;
 				} else {
@@ -158,7 +165,9 @@ export default {
 		},
 		handleVisiableChange(visiable) {
 			if (visiable) {
-				this.modify = -1;
+				setTimeout(() => {
+					this.modify = 0;
+				}, 200);
 			} else {
 				this.loading = false;
 				this.$refs.form.resetFields();
