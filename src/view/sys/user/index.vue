@@ -5,10 +5,15 @@
 		</Sider>
 		<Layout>
 			<Header class="list-header">
-				<Button icon="ios-add-circle-outline" type="primary" @click="handleCreate">添加</Button>
+				<Button
+					icon="ios-add-circle-outline"
+					type="primary"
+					v-if="permission.add"
+					@click="handleCreate"
+				>添加</Button>
 				<!-- <Button icon="md-attach" type="info" @click="handleImport">导入</Button>
 				<Button icon="md-download" type="success" @click="handleExport">导出</Button>-->
-				<Button icon="ios-trash-outline" type="error" @click="handleDelete()">删除</Button>
+				<Button icon="ios-trash-outline" type="error" v-if="permission.del" @click="handleDelete()">删除</Button>
 				<Divider/>
 				<Input v-model="query.name" placeholder="请输入姓名" clearable style="width: 200px"/>
 				<Input v-model="query.authorizer.username" placeholder="请输入用户名" clearable style="width: 200px"/>
@@ -30,8 +35,8 @@
 					<template slot-scope="{ row, index }" slot="username">{{row.authorizer.username}}</template>
 					<template slot-scope="{ row, index }" slot="action">
 						<ButtonGroup>
-							<Button type="primary" size="small" @click="handleUpdate(row,index)">编辑</Button>
-							<Button type="error" size="small" @click="handleDelete([row])">删除</Button>
+							<Button type="primary" size="small" v-if="permission.upd" @click="handleUpdate(row,index)">编辑</Button>
+							<Button type="error" size="small" v-if="permission.del" @click="handleDelete([row])">删除</Button>
 						</ButtonGroup>
 					</template>
 				</Table>
@@ -57,7 +62,8 @@
 <script>
 import FormModal from "./form";
 import ViewModal from "./view";
-import API from "@/api/user";
+import UserAPI from "@/api/user";
+import AuthAPI from "@/api/auth";
 export default {
 	components: {
 		FormModal,
@@ -109,17 +115,33 @@ export default {
 				}
 			],
 			list: [],
-			leftTree: []
+			leftTree: [],
+			permission: {
+				add: false,
+				upd: false,
+				del: false,
+				imp: false,
+				exp: false
+			}
 		};
 	},
 	created() {
+		this.handlePermission();
 		this.handleSearch();
 	},
 	methods: {
+		async handlePermission() {
+			this.permission.add = await AuthAPI.Permission("addUser");
+			this.permission.upd = await AuthAPI.Permission("updUser");
+			this.permission.del = await AuthAPI.Permission("delUser");
+			this.permission.imp = await AuthAPI.Permission("impUser");
+			this.permission.exp = await AuthAPI.Permission("expUser");
+			console.info(this.permission);
+		},
 		async handleSearch() {
 			const _this = this;
 			this.listLoading = true;
-			let res = await API.Page(this.query);
+			let res = await UserAPI.Page(this.query);
 			this.list = res.content;
 			this.totalElemens = res.totalElements;
 			this.listLoading = false;
@@ -157,7 +179,7 @@ export default {
 						let ids = rows.map(item => {
 							return item.id;
 						});
-						await API.RemoveAll(ids);
+						await UserAPI.RemoveAll(ids);
 						_this.handleSearch();
 					}
 				});

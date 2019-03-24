@@ -7,6 +7,9 @@ const api = {
   },
   Logout() {
     return Post('auth/logout');
+  },
+  Permission(permission) {
+    return Post('auth/permission/' + permission);
   }
 };
 export default api;
