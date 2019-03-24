@@ -55,5 +55,9 @@ export async function Request(url, data, method) {
     }
     res = {};
   }
-  return res.data || {};
+  res = res.data;
+  if (!res && res !== false) {
+    res = {};
+  }
+  return res;
 }
