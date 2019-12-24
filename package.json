@@ -1,0 +1,29 @@
+{
+	"name": "wechat-admin-manager",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"serve": "vue-cli-service serve",
+		"build": "vue-cli-service build"
+	},
+	"dependencies": {
+		"axios": "^0.19.0",
+		"babel-polyfill": "^6.26.0",
+		"clipboard": "^2.0.4",
+		"core-js": "^2.6.5",
+		"date-utils": "^1.2.21",
+		"echarts": "^4.2.1",
+		"element-ui": "^2.12.0",
+		"vue": "^2.6.10",
+		"vue-particles": "^1.0.9",
+		"vue-router": "^3.0.3"
+	},
+	"devDependencies": {
+		"@vue/cli-plugin-babel": "^3.9.0",
+		"@vue/cli-service": "^3.9.0",
+		"compressing": "^1.4.0",
+		"node-sass": "^4.9.0",
+		"sass-loader": "^7.1.0",
+		"vue-template-compiler": "^2.6.10"
+	}
+}

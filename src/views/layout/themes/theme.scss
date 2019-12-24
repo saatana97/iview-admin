@@ -1,0 +1,45 @@
+@import './theme-light';
+@import './theme-dark';
+$themes: (
+	light: $light,
+	dark: $dark
+);
+@mixin themify($themes: $themes) {
+	.theme {
+		width: 100%;
+		height: 100%;
+	}
+	@each $theme-name, $map in $themes {
+		.theme-#{$theme-name} {
+			$theme-map: () !global;
+			@each $key, $value in $map {
+				$theme-map: map-merge(
+					$theme-map,
+					(
+						$key: $value
+					)
+				) !global;
+			}
+			@content;
+			$theme-map: null !global;
+		}
+	}
+}
+
+@function t($key) {
+	@return map-get($theme-map, $key);
+}
+
+@mixin flex($direction: row, $row: flex-start, $col: center) {
+	display: flex;
+	flex-direction: $direction;
+	justify-content: $row;
+	align-items: $col;
+	.main-content {
+		flex-grow: 1;
+	}
+}
+@mixin flex-main {
+	flex-grow: 1;
+	flex-shrink: 100;
+}

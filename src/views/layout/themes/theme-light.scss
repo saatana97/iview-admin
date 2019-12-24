@@ -1,0 +1,23 @@
+$bgc-base: #a3d1d8;
+$bgc-light: #ddd;
+$bgc-dark: white;
+$light: (
+	fc-base: #333,
+	fc-power: black,
+	fc-reverse: white,
+	header-bgc: $bgc-base,
+	header-padding: 5px,
+	header-height: 4%,
+	menu-bgc-normal: none,
+	menu-bgc-hover: rgba(0, 0, 0, 0.1),
+	menu-bgc-active: rgba(0, 0, 0, 0.2),
+	aside-bgc: $bgc-light,
+	aside-width: 200px,
+	content-bgc: $bgc-dark,
+	table-bgc: none,
+	table-bc: #eee,
+	footer-height: 36px,
+	footer-width: calc(100% - 10px),
+	footer-bgc: $bgc-base,
+	footer-padding: 5px
+);
